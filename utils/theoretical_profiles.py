@@ -311,7 +311,7 @@ def create_theoretical_profiles(legger_db_filepath, gradient_norm, bv):
 
     # additional: set max on 1.2 times th maximal depth within the specific category
     cursor.execute(
-        "Select categorieoppwaterlichaam, max(diepte) as max_diepte from hydroobjects_kenmerken GROUP BY categorieoppwaterlichaam ORDER BY categorieoppwaterlichaam ")
+        "SELECT categorieoppwaterlichaam, max(diepte) as max_diepte FROM hydroobjects_kenmerken WHERE diepte > 0 AND diepte < 10 GROUP BY categorieoppwaterlichaam ORDER BY categorieoppwaterlichaam ")
     categories_max_depth = cursor.fetchall()
 
     last_category = 15
