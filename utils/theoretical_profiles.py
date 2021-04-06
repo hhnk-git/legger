@@ -18,7 +18,7 @@ Kb = 23  # Bos and Bijkerk coefficient in 1/s
 
 ini_waterdepth = 0.20  # Initial water depth (m).
 default_minimal_waterdepth = ini_waterdepth
-min_ditch_bottom_width = 0.5  # (m) Ditch bottom width can not be smaller dan 0,5m.
+min_ditch_bottom_width = 0.3  # (m) Ditch bottom width can not be smaller dan 0,3m.
 default_minimal_bottom_width = min_ditch_bottom_width
 
 """
