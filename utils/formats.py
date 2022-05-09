@@ -14,6 +14,13 @@ def try_round(value_or_function, decimals=0, default_value=None):
         return default_value
     try:
         return round(value, decimals)
+    except TypeError:
+        # if string
+        try:
+            return round(float(value), decimals)
+        except (ValueError, TypeError):
+            return default_value
+
     except ValueError:
         return default_value
 

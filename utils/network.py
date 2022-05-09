@@ -315,7 +315,6 @@ class Graph(Definitions):
     def get_startnodes(self, modus=Definitions.DEBIET_3DI, ignore_manual=False) -> List[Node]:
         if not ignore_manual and len(self.manual_startnodes) > 0:
             return self.manual_startnodes
-
         start_nodes = []
         for node in self.nodes:
             if len(node.outflow(modus)) == 0:
@@ -534,8 +533,12 @@ class Network(object):
         tree = [[None, float("inf"), False, n.min_category] for n in self.graph.nodes]
 
         # node, tot_weight
-        primary_start_nodes = [[n, 0] for n in self.graph.get_startnodes(mode, ignore_manual=ignore_manual_startnodes)
-                               if n.min_category == start_min_category]
+        all_start_nodes = [[n, 0, n.min_category] for n in
+                           self.graph.get_startnodes(mode, ignore_manual=ignore_manual_startnodes)
+                           if n.min_category <= start_min_category]
+
+        primary_start_nodes = [n[:2] for n in all_start_nodes
+                               if n[2] <= start_min_category]
 
         queue = primary_start_nodes
 
@@ -655,6 +658,104 @@ class Network(object):
         # include all done nodes in queue
         queue = [[self.graph.node(node_nr), weight] for node_nr, [line_nr, weight, freeze, min_cat] in enumerate(tree)
                  if line_nr is not None]
+
+        # additional startnodes
+
+        while len(queue) > 0:
+            node, tot_weight = queue.pop()
+            # if node.id == 113:
+            #     a = 1
+
+            for line in node.outgoing():
+                line: Line
+                to_node = line.end_node()
+                if tree[to_node.nr][2]:
+                    # freezed, so skip
+                    continue
+                if line.debiet(mode) is None:
+                    factor = 2
+                elif line.debiet(mode) >= 0:
+                    factor = 1
+                else:
+                    factor = 3
+
+                if line.category == 2:
+                    factor *= 1.5
+                else:
+                    factor *= 2
+
+                weight = tot_weight + factor * line.length
+                if weight < tree[to_node.nr][1]:
+                    tree[to_node.nr][0] = line.nr
+                    tree[to_node.nr][1] = weight
+                    queue.append([to_node, weight])
+
+            for line in node.incoming():
+                line: Line
+                to_node = line.start_node()
+                if tree[to_node.nr][2]:
+                    # freezed, so skip
+                    continue
+                if line.debiet(mode) is None:
+                    factor = 2
+                elif line.debiet(mode) <= 0:
+                    factor = 1
+                else:
+                    factor = 3
+
+                if line.category == 2:
+                    factor *= 1.5
+                else:
+                    factor *= 2
+
+                weight = tot_weight + factor * line.length
+                if weight < tree[to_node.nr][1]:
+                    tree[to_node.nr][0] = line.nr
+                    tree[to_node.nr][1] = weight
+                    queue.append([to_node, weight])
+
+        for node_nr, [line_nr, weight, _, _] in enumerate(tree):
+            if line_nr is not None:
+                line = self.graph.line(line_nr)
+                # if line.id == 1084919:
+                #     a = 1
+
+                line.extra_data['weight'] = weight
+                if line.inflow_node(mode).nr != node_nr:
+                    if line.debiet(mode) is None or line.debiet(mode) > 0:
+                        if do_reverse:
+                            line.reverse()
+                    line.forced_direction = True
+
+        for line in self.graph.lines:
+            if line.extra_data.get('weight') is None:
+                # if line.id == 377326:
+                #     a = 1
+                weight_inflow = tree[line.inflow_node(mode).nr][1]
+                weight_outflow = tree[line.outflow_node(mode).nr][1]
+                if weight_inflow is not None and weight_outflow is not None:
+                    if True and line.debiet(mode) is not None:
+                        line.extra_data['weight'] = weight_outflow
+                    elif weight_inflow < weight_outflow:
+                        line.extra_data['weight'] = weight_outflow
+                        if line.debiet(mode) is None or line.debiet(mode) > 0:
+                            if do_reverse:
+                                line.reverse()
+                        line.forced_direction = True
+                    else:
+                        line.extra_data['weight'] = weight_inflow
+                line.extra_data['tree_end'] = True
+
+        # freeze all values made based on connection with
+        tree = [[line_nr, weight, line_nr is not None, min_cat] for line_nr, weight, freeze, min_cat in tree]
+
+        queue = []
+        # last, add additional endnodes....
+        for node, weight, min_cat in all_start_nodes:
+
+            if tree[node.nr][0] is None:
+                queue.append([node, 100000])
+
         while len(queue) > 0:
             node, tot_weight = queue.pop()
             # if node.id == 113:
@@ -877,7 +978,7 @@ class Network(object):
                                         line.debiet_modified is None and \
                                         line.category >= category:
                                     line.set_debiet_modified(min_flow)
-                                        # line.debiet_3di if line.debiet_3di is not None else min_flow, 0)
+                                    # line.debiet_3di if line.debiet_3di is not None else min_flow, 0)
 
                         if c_last_repeated in [6, 8, 10]:
                             # for larger circulars set all tree end parts to minflow and add these endpoints to the queue
@@ -887,7 +988,7 @@ class Network(object):
                                         line.debiet_modified is None and \
                                         line.category >= all_category:
                                     line.set_debiet_modified(min_flow)
-                                        # line.debiet_3di if line.debiet_3di is not None else min_flow, 0)
+                                    # line.debiet_3di if line.debiet_3di is not None else min_flow, 0)
                                     add_node = line.outflow_node(modus=Definitions.FORCED)
                                     if not node_done[add_node.nr]:
                                         node_queue[add_node.id] = add_node
@@ -906,7 +1007,8 @@ class Network(object):
     def hydrovak_class_tree_with_data(self):
 
         line_tree = {}
-        tree = self.force_direction(mode=Definitions.DEBIET_DB, do_reverse=False, ignore_manual_startnodes=True)
+        tree = self.force_direction(mode=Definitions.DEBIET_DB, do_reverse=True, ignore_manual_startnodes=True,
+                                    start_min_category=4)
         # create dicts with lines (arcs), required information and mark vertexes in bi-directional islands
         for line in self.graph.lines:
             ids = line.id
@@ -977,7 +1079,7 @@ class Network(object):
             downstream_line = self.graph.lines[hline['downstream_line_nr']] if hline[
                                                                                    'downstream_line_nr'] is not None else None
 
-            if hline.get('id') in [474252, 140888]:
+            if hline.get('id') in [110688, 110766]:
                 a = 1
 
             if hline['downstream_line_nr'] is None or not downstream_line_old:

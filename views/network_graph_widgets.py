@@ -18,6 +18,9 @@ log = logging.getLogger('legger.' + __name__)
 
 precision = 0.000001
 
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
+
 
 class LeggerPlotWidget(pg.PlotWidget):
 
