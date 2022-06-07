@@ -57,8 +57,8 @@ HORIZONTAL_HEADERS = (
     {'field': 'selected_begroeiingsvariant_id', 'header': 'beg', 'header_tooltip': 'geselecteerde begroeiingsvariant id', 'column_width': 40},
     {'field': 'score', 'show': True, 'header_tooltip': 'score fit', 'column_width': 50},
     {'field': 'selected_variant_id', 'show': False, 'column_width': 100},
-    {'field': 'selected_remarks', 'header': 'opm', 'header_tooltip': 'opmerkingen bij hydrovak', 'show': True, 'column_width': 30, 'field_type': INDICATION_HOVER},
-    {'field': 'kijkp_reden', 'header': 'kp', 'header_tooltip': 'kijkprofiel', 'show': True, 'column_width': 30, 'field_type': INDICATION_HOVER_FUNCTION, 'hover_function': kijkprofiel_function},
+    {'field': 'opmerkingen', 'header': 'opm', 'header_tooltip': 'opmerkingen bij hydrovak', 'show': True, 'column_width': 30, 'field_type': INDICATION_HOVER},
+    {'field': 'kijkp_breedte', 'header': 'kp', 'header_tooltip': 'kijkprofiel', 'show': True, 'column_width': 30, 'field_type': INDICATION_HOVER_FUNCTION, 'hover_function': kijkprofiel_function},
 )
 
 
@@ -99,6 +99,7 @@ class hydrovak_class(object):
             'selected_variant_id': 'geselecteerde_variant',
             'begroeiingsvariant_id': 'begroeiingsvariant_id',
             'selected_begroeiingsvariant_id': 'geselecteerde_begroeiingsvariant',
+            'opmerkingen': 'opmerking',
             'kijkp_breedte': 'kijkp_breedte',
             'kijkp_diepte': 'kijkp_diepte',
             'kijkp_talud': 'kijkp_talud',

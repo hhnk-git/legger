@@ -1,7 +1,8 @@
 import os.path
 
-from qgis.PyQt.QtCore import Qt
+from legger.utils.user_message import messagebar_message
 from legger.views.legger_network_widget import LeggerWidget
+from qgis.PyQt.QtCore import Qt
 
 
 class LeggerNetworkTool:
@@ -56,6 +57,12 @@ class LeggerNetworkTool:
         #     'test_spatialite_with_matchprof.sqlite'
         # )
 
+        if not self.root_tool.polder_datasource:
+            messagebar_message('input', 'Er is geen leggerdatabase opgegeven',
+                               level=2)
+            self.root_tool.read_database.run()
+
+            return
 
         if self.dock_widget is None:
             self.dock_widget = LeggerWidget(

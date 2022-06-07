@@ -9,10 +9,10 @@ def create_legger_views(session: sqlite3.Connection):
             CREATE VIEW hydroobjects_kenmerken AS 
             SELECT 
                 h.id, 
-                code, 
-                categorieoppwaterlichaam, 
-                streefpeil,
-                zomerpeil,
+                h.code, 
+                h.categorieoppwaterlichaam, 
+                h.streefpeil,
+                h.zomerpeil,
                 ABS(debiet) as debiet,
                 ABS(debiet_inlaat) as debiet_inlaat,
                 ABS(debiet_3di) as debiet_3di,
@@ -35,10 +35,10 @@ def create_legger_views(session: sqlite3.Connection):
                 geselecteerd_afvoer_leidend,
 
                 h.opmerkingen,
-                kijkp_breedte,
-                kijkp_diepte,
-                kijkp_talud,
-                kijkp_reden,
+                h.kijkp_breedte,
+                h.kijkp_diepte,
+                h.kijkp_talud,
+                h.kijkp_reden,
                 CASE 
                   WHEN h.debiet_aangepast >= 0 THEN "GEOMETRY"
                   WHEN h.debiet_aangepast THEN ST_REVERSE("GEOMETRY")
@@ -139,7 +139,7 @@ def create_legger_views(session: sqlite3.Connection):
                 h.code, 
                 h.categorieoppwaterlichaam, 
                 h.streefpeil, 
-                h.winterpeil,
+                h.zomerpeil,
                 h.debiet,
                 h.debiet_inlaat,
                 h.debiet_3di,
@@ -151,6 +151,7 @@ def create_legger_views(session: sqlite3.Connection):
                 h.kijkp_diepte,
                 h.kijkp_talud,
                 h.kijkp_reden,
+                h.opmerkingen,
                 ST_LENGTH(h.geometry) as lengte,
                 h.geometry,
                 s.selected_on as geselecteerd_op,
