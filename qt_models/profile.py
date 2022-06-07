@@ -102,13 +102,16 @@ class ProfileModel(ModifiedBaseModel):
                            round=2,
                            column_name='sc',
                            column_tooltip='score')
+        score_color = ColorField(show=False,
+                                      default_value=(0, 0, 0, 0))
 
         over_depth = ValueField(show=True,
                                 column_width=45,
                                 round=2,
                                 column_name='od',
                                 column_tooltip='overdiepte [m]')
-        over_depth_color = ColorField(show=False)
+        over_depth_color = ColorField(show=False,
+                                      default_value=(0, 0, 0, 0))
 
         over_width = ValueField(show=True,
                                 column_width=45,
@@ -131,7 +134,7 @@ class ProfileModel(ModifiedBaseModel):
         verhang_inlaat = ValueField(show=True,
                                     column_width=45,
                                     round=1,
-                                    column_name='inlaat',
+                                    column_name='inl.vh.',
                                     column_tooltip='verhang inlaat [cm/km]',
                                     color_from='verhang_inlaat_color')
         verhang_inlaat_color = ColorField(show=False,

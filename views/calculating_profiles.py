@@ -534,7 +534,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.save_button.setText("Opslaan en sluiten")
         self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
         self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
-        self.step_redirect_flow_button.setText("Herverdeel debieten naar primair")
+        self.step_redirect_flow_button.setText("Kies eerst eindpunten, dan herverdeel debieten")
         self.step2_explanation_button.setText("Uitleg stap 3")
         self.step2_button.setText("Bereken alle mogelijke leggerprofielen")
         self.step3_button.setText("Bereken de fit van de berekende profielen")
