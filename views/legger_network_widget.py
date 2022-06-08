@@ -3,34 +3,30 @@ from collections import OrderedDict
 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QSplitter
-from qgis.PyQt import QtWidgets
+from legger.qt_models.area_tree import AreaTreeItem, AreaTreeModel, area_class
+from legger.qt_models.legger_tree import LeggerTreeItem, LeggerTreeModel
+from legger.qt_models.profile import ProfileModel
+from legger.sql_models.legger import (BegroeiingsVariant, GeselecteerdeProfielen, HydroObject, ProfielFiguren,
+                                      Varianten)
+from legger.sql_models.legger_database import LeggerDatabase, load_spatialite
+from legger.sql_models.legger_views import create_legger_views
+from legger.utils.formats import try_round
+from legger.utils.legger_map_manager import LeggerMapManager
+from legger.utils.network import Network
+from legger.utils.network_utils import LeggerMapVisualisation
+from legger.utils.user_message import messagebar_message
+from legger.views.input_widget import NewWindow
+from legger.views.kijk_legger_popup import KijkProfielPopup
 from qgis.PyQt.QtCore import QMetaObject, QSize, Qt, pyqtSignal, QVariant, QSortFilterProxyModel
 from qgis.PyQt.QtWidgets import (QApplication, QComboBox, QDockWidget, QGroupBox, QHBoxLayout, QLabel, QPlainTextEdit,
                                  QPushButton, QSizePolicy, QSpacerItem, QTabWidget, QVBoxLayout, QWidget, QCompleter,
                                  QAbstractItemView)
-from legger.qt_models.area_tree import AreaTreeItem, AreaTreeModel, area_class
-from legger.qt_models.legger_tree import LeggerTreeItem, LeggerTreeModel
-from legger.qt_models.profile import ProfileModel
-from legger.sql_models.legger import (BegroeiingsVariant, GeselecteerdeProfielen, HydroObject, Kenmerken,
-                                      ProfielFiguren, Varianten)
-from legger.sql_models.legger_database import LeggerDatabase, load_spatialite
-from legger.utils.formats import try_round
-from legger.utils.legger_map_manager import LeggerMapManager
-from legger.utils.network_utils import LeggerMapVisualisation
-from legger.utils.new_network import NewNetwork
-from legger.utils.network import Network
-from legger.utils.user_message import messagebar_message
-from legger.views.input_widget import NewWindow
-from legger.views.kijk_legger_popup import KijkProfielPopup
 from qgis._core import QgsFields
-from legger.sql_models.legger_views import create_legger_views
 from qgis._gui import QgsMapToolIdentifyFeature, QgsMapToolIdentify
-
-from .network_graph_widgets import LeggerPlotWidget, LeggerSideViewPlotWidget
 from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsField, QgsPointXY
-from qgis.analysis import QgsVectorLayerDirector
 from sqlalchemy import and_, or_
 
+from .network_graph_widgets import LeggerPlotWidget, LeggerSideViewPlotWidget
 from .network_table_widgets import LeggerTreeWidget, StartpointTreeWidget, VariantenTable
 
 log = logging.getLogger('legger.' + __name__)
@@ -602,6 +598,7 @@ class LeggerWidget(QDockWidget):
                 self.save_remarks()
                 self.selected_variant_remark.setPlainText('')
                 self.selected_variant_remark.setDisabled(True)
+                self.kijk_variant_knop.setDisabled(True)
 
                 ids = [feat.id() for feat in self.vl_selected_layer.getFeatures()]
                 self.vl_selected_layer.dataProvider().deleteFeatures(ids)
@@ -639,7 +636,6 @@ class LeggerWidget(QDockWidget):
         elif self.legger_model.columns[index.column()].get('field') in ['ep', 'sp']:
             # clear current track
             if self.legger_model.sp is None or self.legger_model.ep is None:
-                self.kijk_variant_knop.setDisabled(True)
                 self.track_nodes = []
 
                 ids = [feat.id() for feat in self.vl_track_layer.getFeatures()]
@@ -657,7 +653,6 @@ class LeggerWidget(QDockWidget):
 
                 fields = QgsFields()
                 fields.append(QgsField("id", QVariant.Int))
-                self.kijk_variant_knop.setDisabled(False)
 
                 def loop_rec(node):
                     if node.hydrovak.get('tak'):
@@ -861,6 +856,7 @@ class LeggerWidget(QDockWidget):
         if hydro_object is None:
             self.selected_variant_remark.setPlainText('')
             self.selected_variant_remark.setDisabled(True)
+            self.kijk_variant_knop.setDisabled(True)
             return None
 
         self.selected_hydrovak = item
@@ -869,7 +865,8 @@ class LeggerWidget(QDockWidget):
         self.selected_hydrovak_db = hydro_object
 
         self.selected_variant_remark.setDisabled(False)
-        self.selected_variant_remark.setPlainText(item.hydrovak.get('selected_remarks'))
+        self.kijk_variant_knop.setDisabled(False)
+        self.selected_variant_remark.setPlainText(item.hydrovak.get('opmerkingen'))
         self.update_available_variants()
 
     def save_remarks(self):
@@ -877,6 +874,8 @@ class LeggerWidget(QDockWidget):
             session = load_spatialite(self.path_legger_db)
 
             # save to database
+            txt = self.selected_variant_remark.toPlainText()
+
             session.execute(
                 """
                 UPDATE 
@@ -886,14 +885,15 @@ class LeggerWidget(QDockWidget):
                 WHERE 
                   id = ?
             """,
-                [self.selected_variant_remark.toPlainText(),
+                [txt,
                  self.selected_hydrovak.hydrovak['id']]
             )
+            session.commit()
 
             # update tree
             self.legger_model.setDataItemKey(
                 self.selected_hydrovak,
-                'selected_remarks',
+                'opmerkingen',
                 self.selected_variant_remark.toPlainText())
 
     def update_available_variants(self):
@@ -947,6 +947,10 @@ class LeggerWidget(QDockWidget):
                     0].breedte is not None and profile.waterbreedte is not None:
                     over_width = profile.hydro.kenmerken[0].breedte - profile.waterbreedte
 
+            prof_verhang = profile.verhang
+            if prof_verhang is None or (profile.verhang_inlaat is not None and prof_verhang < profile.verhang_inlaat):
+                prof_verhang = profile.verhang_inlaat
+
             profs.append({
                 'name': profile.id,
                 'active': active,  # digits differ far after the
@@ -959,7 +963,7 @@ class LeggerWidget(QDockWidget):
                                                                                                                    255,
                                                                                                                    255],
                 'verhang': profile.verhang,
-                'color': interpolated_color(value=profile.verhang, color_map=color_map,
+                'color': interpolated_color(value=prof_verhang, color_map=color_map,
                                             alpha=(255 if active else 80)),
                 'verhang_inlaat': profile.verhang_inlaat,
                 'color_inlaat': interpolated_color(value=profile.verhang_inlaat, color_map=color_map,

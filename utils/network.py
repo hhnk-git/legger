@@ -863,6 +863,9 @@ class Network(object):
             # if 140870 in [l.id for l in node.outflow(modus=Definitions.FORCED)]:
             #     a = 1
 
+            if node.nr in [18, 27]:
+                a = 1
+
             flow = node.flow(modus=Definitions.FORCED)
             flow_3di = node.flow(modus=Definitions.DEBIET_3DI)
             added_flow_on_point = flow_3di['outflow_debiet'] - flow_3di['inflow_debiet']
@@ -957,6 +960,9 @@ class Network(object):
                 else:
                     # wait with this node. add it to the end of the stack.
                     node_queue[node.id] = node
+
+                    if node.nr in [18, 27]:
+                        a = 1
                     # at this moment nothing has processed last loop
                     if node == last_node:
                         print(node.nr)
@@ -1027,6 +1033,9 @@ class Network(object):
             inflow_node = line.inflow_node(Definitions.DEBIET_DB)
             outflow_node = line.outflow_node(Definitions.DEBIET_DB)
 
+            if ids in [110688, 110766]:
+                a = 1
+
             line_tree[line.nr] = hydrovak_class(
                 data_dict={
                     # basic information
@@ -1083,7 +1092,8 @@ class Network(object):
                 a = 1
 
             if hline['downstream_line_nr'] is None or not downstream_line_old:
-                a = 1
+                if hline.get('id') in [110688, 110766]:
+                    a = 1
 
                 start_lines[line_nr] = {
                     'line_nr': line_nr,

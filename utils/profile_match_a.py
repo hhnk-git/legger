@@ -12,6 +12,7 @@ matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import shapely
 import shapely.geometry
+from shapely.errors import TopologicalError
 # from descartes import PolygonPatch
 from matplotlib.pyplot import savefig
 
@@ -299,7 +300,18 @@ def prof_in_prof(profgem, proftheo, aantstap=100, delta=0.001, obdiepte=0.001, d
     rhrb = proftheo.exterior.coords[2]  # het rechte stuk van het theoretisch profiel (tbv overdiepte)
     oblijn = shapely.geometry.LineString([(0, profgem.bounds[3] - obdiepte),
                                           (waterbreedte_gemeten + 2 * waterbreedte_theo, profgem.bounds[3] - obdiepte)])
-    clijn = profgem.intersection(oblijn)  # oblijn tbv overbreedte, clijn controle lijnstuk tbv overbreedte
+    if not oblijn.is_valid:
+        logger.error('oblijn not valid. geom is: %s', oblijn.wkt)
+
+    if not profgem.is_valid:
+        logger.error('profgem not valid. geom is: %s', profgem.wkt)
+
+    try:
+        clijn = profgem.intersection(oblijn)  # oblijn tbv overbreedte, clijn controle lijnstuk tbv overbreedte
+    except TopologicalError as e:
+        logger.error(e)
+        return -99, -99, -99, -99, -99, -99
+
     gemprof = shapely.affinity.translate(profgem, -profgem.bounds[0], 0.0, 0.0)  # op nul meter laten beginnen
     profzoek = shapely.affinity.translate(proftheo, -waterbreedte_theo, 0.0, 0.0)  # verschuif naar nul overlap
     stap = (waterbreedte_gemeten + waterbreedte_theo + waterbreedte_theo) / aantstap

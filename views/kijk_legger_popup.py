@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import datetime
 import logging
+from typing import TYPE_CHECKING
 
+from legger.sql_models.legger_database import load_spatialite
 from qgis.PyQt import QtCore, QtWidgets
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QWidget
-from legger.sql_models.legger_database import load_spatialite
+
+if TYPE_CHECKING:
+    from legger.views.legger_network_widget import LeggerWidget
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +31,7 @@ class KijkProfielPopup(QWidget):  # , FORM_CLASS):
     closingDialog = pyqtSignal()
 
     def __init__(
-            self, parent, iface, netwerktool):
+            self, parent, iface, netwerktool: "LeggerWidget"):
         """Constructor
 
         :parent: Qt parent Widget
@@ -41,10 +46,14 @@ class KijkProfielPopup(QWidget):  # , FORM_CLASS):
         self.setup_ui()
 
         self.netwerktool = netwerktool
-        self.input_width.setValue(netwerktool.init_width)
-        self.input_depth.setValue(netwerktool.init_depth)
-        self.input_talud.setValue(netwerktool.init_talud)
-        self.input_reason.setCurrentText(netwerktool.init_reason)
+        self.input_width.setValue(
+            netwerktool.selected_hydrovak.hydrovak.get('kijkp_breedte', netwerktool.init_width))
+        self.input_depth.setValue(
+            netwerktool.selected_hydrovak.hydrovak.get('kijkp_diepte',netwerktool.init_depth))
+        self.input_talud.setValue(
+            netwerktool.selected_hydrovak.hydrovak.get('kijkp_talud',netwerktool.init_talud))
+        self.input_reason.setCurrentText(
+            netwerktool.selected_hydrovak.hydrovak.get('kijkp_reden', netwerktool.init_reason))
 
         self.input_reason.insertItems(
             0,
@@ -61,38 +70,51 @@ class KijkProfielPopup(QWidget):  # , FORM_CLASS):
              'Belangen omgeving'
              ])
 
-
-
     def save_to_db(self, width, depth, talud, reason):
-        ids = [feat[0] for feat in self.netwerktool.vl_track_layer.getFeatures()]
+        # ids = [feat[0] for feat in self.netwerktool.vl_track_layer.getFeatures()]
+        # one hydrovak, as requested on 7-6-2022
+        idv = self.netwerktool.selected_hydrovak.hydrovak.get('id')
 
-        session = load_spatialite(self.netwerktool.path_legger_db)
+        if idv:
+            session = load_spatialite(self.netwerktool.path_legger_db)
 
-        # save to database
-        session.execute(
-            """
-            UPDATE 
-            hydroobject 
-            SET
-             kijkp_breedte = ?,
-             kijkp_diepte = ?,
-             kijkp_talud = ?,
-             kijkp_reden = ?
-             WHERE 
-              id in ({})
-        """.format(",".join([str(i) for i in ids])),
-            [width, depth, talud, reason]
-        )
-        # update table
-        for node in self.netwerktool.track_nodes:
-            node.hydrovak.update({
+            # save to database
+            session.execute(
+                """
+                UPDATE 
+                    hydroobject 
+                SET
+                 kijkp_breedte = ?,
+                 kijkp_diepte = ?,
+                 kijkp_talud = ?,
+                 kijkp_reden = ?
+                 WHERE 
+                  id = ?
+            """,
+                [width, depth, talud, reason, idv]
+            )
+            # update table
+            # set new value to trigger repaint
+            self.netwerktool.legger_model.setDataItemKey(
+                self.netwerktool.selected_hydrovak,
+                'kijkp_breedte',
+                datetime.datetime.now().isoformat())
+
+            self.netwerktool.selected_hydrovak.hydrovak.update({
                 'kijkp_breedte': width,
                 'kijkp_diepte': depth,
                 'kijkp_talud': talud,
                 'kijkp_reden': reason,
             })
+            # for node in self.netwerktool.selected_hydrovak.hydrovak:
+            #     node.hydrovak.update({
+            #         'kijkp_breedte': width,
+            #         'kijkp_diepte': depth,
+            #         'kijkp_talud': talud,
+            #         'kijkp_reden': reason,
+            #     })
 
-        session.commit()
+            session.commit()
 
     def save(self):
         self.save_to_db(
