@@ -46,14 +46,16 @@ class KijkProfielPopup(QWidget):  # , FORM_CLASS):
         self.setup_ui()
 
         self.netwerktool = netwerktool
-        self.input_width.setValue(
-            netwerktool.selected_hydrovak.hydrovak.get('kijkp_breedte', netwerktool.init_width))
-        self.input_depth.setValue(
-            netwerktool.selected_hydrovak.hydrovak.get('kijkp_diepte',netwerktool.init_depth))
-        self.input_talud.setValue(
-            netwerktool.selected_hydrovak.hydrovak.get('kijkp_talud',netwerktool.init_talud))
-        self.input_reason.setCurrentText(
-            netwerktool.selected_hydrovak.hydrovak.get('kijkp_reden', netwerktool.init_reason))
+
+        init_width = netwerktool.selected_hydrovak.hydrovak.get('kijkp_breedte')
+        init_depth = netwerktool.selected_hydrovak.hydrovak.get('kijkp_diepte')
+        init_talud = netwerktool.selected_hydrovak.hydrovak.get('kijkp_talud')
+        init_reason = netwerktool.selected_hydrovak.hydrovak.get('kijkp_reden')
+
+        self.input_width.setValue(init_width if init_width is not None else netwerktool.init_width)
+        self.input_depth.setValue(init_depth if init_depth is not None else netwerktool.init_depth)
+        self.input_talud.setValue(init_talud if init_talud is not None else netwerktool.init_talud)
+        self.input_reason.setCurrentText(init_reason if init_reason is not None else netwerktool.init_reason)
 
         self.input_reason.insertItems(
             0,
@@ -139,6 +141,7 @@ class KijkProfielPopup(QWidget):  # , FORM_CLASS):
             None,
             None
         )
+        super().close()
 
     def closeEvent(self, event):
         """

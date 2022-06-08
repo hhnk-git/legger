@@ -99,7 +99,7 @@ class hydrovak_class(object):
             'selected_variant_id': 'geselecteerde_variant',
             'begroeiingsvariant_id': 'begroeiingsvariant_id',
             'selected_begroeiingsvariant_id': 'geselecteerde_begroeiingsvariant',
-            'opmerkingen': 'opmerking',
+            'opmerkingen': 'opmerkingen',
             'kijkp_breedte': 'kijkp_breedte',
             'kijkp_diepte': 'kijkp_diepte',
             'kijkp_talud': 'kijkp_talud',
