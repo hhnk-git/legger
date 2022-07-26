@@ -80,7 +80,7 @@ def calc_pitlo_griffioen(flow, ditch_bottom_width, water_depth, slope, friction_
 
     ditch_circumference = width_at_waterlevel + 2 * (1 - begroeiingsdeel) * water_depth
 
-    total_cross_section_area = (ditch_bottom_width + water_depth * slope) * water_depth
+    total_cross_section_area = 0.5 * (width_at_waterlevel - ditch_bottom_width) * water_depth + ditch_bottom_width * water_depth
 
     A_1 = (1 - begroeiingsdeel) * total_cross_section_area
     A_2 = begroeiingsdeel * total_cross_section_area
