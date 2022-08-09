@@ -233,7 +233,7 @@ def calc_profile_variants_for_hydro_object(
                                         'begroeiingsdeel', 'surge', 'afvoer_leidend', 'verhang_inlaat'])
 
     # minus 0.10, because in loop this is added
-    water_depth = store_from_depth - 0.05
+    water_depth = store_from_depth - 0.10
 
     go_on = True
     afvoer_leidend = 1
@@ -371,7 +371,7 @@ def create_theoretical_profiles(legger_db_filepath, gradient_norm, gradient_norm
     for category, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.category == category), 'slope'] = slope
 
-    hydro_objects.loc[(hydro_objects.grondsoort == "veenweide") & (hydro_objects.slope < 3.0), 'slope'] = 3.0
+    hydro_objects.loc[(hydro_objects.grondsoort == "veenweide") & (hydro_objects.slope < 3.0), 'slope'] = 3.0 # wordt dit gebruikt? Gaat nu toch met taludvoorkeur?
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
     hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 2.0
