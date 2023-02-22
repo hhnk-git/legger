@@ -33,7 +33,6 @@ def redirect_flows(iface, path_legger_db):
     con_legger = load_spatialite(path_legger_db)
     create_legger_views(con_legger)
 
-
     #
     # con_legger = load_spatialite(path_legger_db)
     #

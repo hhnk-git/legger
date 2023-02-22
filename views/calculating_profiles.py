@@ -18,9 +18,11 @@ from legger.utils.read_tdi_results import (get_timestamps, read_tdi_culvert_resu
 from legger.utils.redirect_flows_to_main_branches import redirect_flows
 from legger.utils.snap_points import snap_points
 from legger.utils.theoretical_profiles import create_theoretical_profiles, write_theoretical_profile_results_to_db
+from legger.utils.automatic_fill_legger import automatic_fill_legger
 from qgis.PyQt import QtCore, QtWidgets
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QComboBox, QWidget
+
 
 log = logging.getLogger(__name__)
 
@@ -323,7 +325,13 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.feedbacktext.setText("De punten zijn gesnapt.")
 
     def execute_pre_fill(self):
-        self.feedbacktext.setText("Waarschuwing: nog niet geimplementeerd")
+        try:
+            automatic_fill_legger(self.polder_datasource)
+        except Exception as e:
+            log.exception(e)
+            self.feedbacktext.setText("fout bij invullen")
+        else:
+            self.feedbacktext.setText("legger is ingevuld")
 
     def run_all(self):
         self.execute_snap_points()

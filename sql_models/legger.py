@@ -259,6 +259,10 @@ class Varianten(Base):
     waterbreedte = Column(Float)
     bodembreedte = Column(Float)
     talud = Column(Float)
+    hydraulische_diepte = Column(Float)
+    hydraulische_waterbreedte = Column(Float)
+    hydraulische_bodembreedte = Column(Float)
+    hydraulische_talud = Column(Float)
     # maatgevend_debiet = Column(Float)
     verhang = Column(Float)
     verhang_inlaat = Column(Float)
@@ -267,6 +271,9 @@ class Varianten(Base):
     hydro_id = Column(Integer,
                       ForeignKey(HydroObject.__tablename__ + ".id"),
                       index=True)
+
+    standaard_profiel_code = Column(String())
+
 
     begroeiingsvariant = relationship(BegroeiingsVariant,
                                       # foreign_keys='begroeiingsvariant_id',
@@ -306,7 +313,6 @@ class GeselecteerdeProfielen(Base):
     tot_verhang = Column(Float)
 
     hydro_verhang = Column(Float)
-    tot_verhang = Column(Float)
 
     hydro = relationship(HydroObject,
                          back_populates="geselecteerd")

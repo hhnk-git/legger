@@ -1,3 +1,4 @@
+import datetime
 import logging
 from collections import OrderedDict
 
@@ -512,11 +513,13 @@ class LeggerWidget(QDockWidget):
                             GeselecteerdeProfielen.hydro_id == node.hydrovak.get('hydro_id')).first()
                         if selected:
                             selected.variant = profilev
+                            selected.selected_on = datetime.datetime.now()
                             selected.hydro_verhang = profilev.verhang * node.hydrovak.get('length')
                         else:
                             selected = GeselecteerdeProfielen(
                                 hydro_id=node.hydrovak.get('hydro_id'),
                                 variant_id=profilev.id,
+                                selected_on=datetime.datetime.now(),
                                 hydro_verhang=profilev.verhang * node.hydrovak.get('length') / 1000
                             )
                         self.session.add(selected)

@@ -18,6 +18,14 @@ def to_string(value):
     except ValueError:
         return '-'
 
+
+def try_float(value):
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
 def kijkprofiel_function(item, column_index):
     return "diepte: {} m\nwaterbreedte: {} m\ntalud: {}\nreden: {}".format(
         to_string(item.hydrovak.get('kijkp_diepte')),
@@ -303,13 +311,18 @@ class LeggerTreeModel(BaseTreeModel):
             elif item.hydrovak.get('hover'):
                 return QBrush(QColor(*settings.HOVER_COLOR))
             # kleuren voor ingevulde die een score hebben 
-            elif item.hydrovak.get('selected_depth') is not None and item.hydrovak.get('verhang') is not None and item.hydrovak.get('verhang_inlaat') is not None and item.hydrovak.get('score') is not None:
-                if float(item.hydrovak.get('verhang')) <= 4.0 and float(item.hydrovak.get('verhang_inlaat')) <= 4.0 and float(item.hydrovak.get('score')) >= 0.98:
-                    return QBrush(QColor(*settings.GOOD_COLOR))
-                else:# float(item.hydrovak.get('score')) < 0.98:
+            elif item.hydrovak.get('selected_depth') is not None and try_float(item.hydrovak.get('verhang')) is not None and item.hydrovak.get('verhang_inlaat') is not None and item.hydrovak.get('score') is not None:
+                verhang = try_float(item.hydrovak.get('verhang'))
+                verhang_inlaat = try_float(item.hydrovak.get('verhang_inlaat'))
+
+
+
+                if (verhang is not None and verhang >= 4.0) or (verhang_inlaat is not None and verhang_inlaat >= 4.0) or (item.hydrovak.get('score') is not None and float(item.hydrovak.get('score')) >= 0.98):
                     return QBrush(QColor(*settings.READY_COLOR))
+                else:
+                    return QBrush(QColor(*settings.GOOD_COLOR))
             # kleuren voor ingevulde die geen score hebben 
-            elif item.hydrovak.get('selected_depth') is not None and item.hydrovak.get('verhang') is not None and item.hydrovak.get('verhang_inlaat') is not None and item.hydrovak.get('score') is None:
+            elif item.hydrovak.get('selected_depth') is not None and try_float(item.hydrovak.get('verhang')) is not None and try_float(item.hydrovak.get('verhang_inlaat')) is not None and try_float(item.hydrovak.get('score')) is None:
                 if float(item.hydrovak.get('verhang')) <= 4.0 and float(item.hydrovak.get('verhang_inlaat')) <= 4.0:
                     return QBrush(QColor(*settings.MAYBE_COLOR))
             # alle andere ingevulde krijgen een licht oranje kleur
