@@ -6,6 +6,9 @@ import tempfile
 from qgis.core import (QgsDataSourceUri, QgsProject, QgsProject, QgsVectorLayer, QgsLayerTreeNode)
 from collections import namedtuple
 
+from legger.sql_models.legger_views import create_legger_views
+from legger.utils.spatialite import load_spatialite
+
 log = logging.getLogger(__name__)
 
 LayerDefinition = namedtuple('LayerDefinition',
@@ -61,6 +64,10 @@ class LayerManager():
     def add_layers_to_map(self):
         # {layer_name: [(name, layer, field, style, geometry_field, range, is_view), ...], ... }
 
+        log.info('create views')
+        create_legger_views(load_spatialite(self.spatialite_path))
+        log.info('ready create views')
+
         styled_layers = OrderedDict([
             ('basisgegevens', [
                 LayerDefinition('debiet', 'hydroobject', 'debiet', 'debiet', 'geometry', 'min_max_line', False),
@@ -73,10 +80,12 @@ class LayerManager():
             ('tbv begroeiingsgraad', [
                 LayerDefinition('aanwijzen', 'hydroobject', 'begroeiingsvariant_id', 'begroeiingsvariant', 'geometry',
                                 None, False),
-                LayerDefinition('begroeiingsadvies', 'begroeiingsadvies', 'advies_id', 'begroeiingsvariant', 'geometry',
-                                None, True),
-                LayerDefinition('begroeiingsvariant', 'begroeiingsadvies', 'aangew_bv_id', 'begroeiingsvariant',
-                                'geometry', None, True),
+                # tijdelijk uit, kost veel tijd om te laden
+                # LayerDefinition('begroeiingsadvies', 'begroeiingsadvies', 'advies_id', 'begroeiingsvariant', 'geometry',
+                #                 None, True),
+                # LayerDefinition('begroeiingsvariant', 'begroeiingsadvies', 'aangew_bv_id', 'begroeiingsvariant',
+                #                 'geometry', None, True),
+
                 # ('sterk min profiel', 'ruimte_view', 'ruim', 'min_max_line', 'geometry', None),
                 # ('ruimte', 'ruimte_view', 'over_width', 'min_max_line', 'geometry', None),
             ]),
@@ -143,6 +152,8 @@ class LayerManager():
             for layer in layers:
                 layer: LayerDefinition
 
+                log.info('create layer %s', layer.name)
+
                 uri = QgsDataSourceUri()
                 uri.setDatabase(self.spatialite_path.replace('\\', '/'))
                 if layer.is_view:
@@ -170,4 +181,5 @@ class LayerManager():
                     new_style_file.write(style)
                     new_style_file.close()
 
+                    log.info('add layer %s', layer.name)
                     self.add_layer_to_group(qgroup, vector_layer, new_style_path, visible=False, position=100)

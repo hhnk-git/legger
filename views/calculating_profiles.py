@@ -303,6 +303,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
             except Exception as e:
                 log.error(e)
                 self.feedbackmessage = self.feedbackmessage + ("\nFout, profielen niet opgeslagen in legger database. melding: {}")
+                raise e
             finally:
                 self.feedbacktext.setText(self.feedbackmessage)
 
@@ -330,6 +331,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         except Exception as e:
             log.exception(e)
             self.feedbacktext.setText("fout bij invullen")
+            raise e
         else:
             self.feedbacktext.setText("legger is ingevuld")
 

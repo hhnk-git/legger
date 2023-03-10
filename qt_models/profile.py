@@ -76,6 +76,10 @@ class ProfileModel(ModifiedBaseModel):
     class Fields:
         """Fields and functions of ModelItem"""
 
+        is_standaard = CheckboxField(show=False,
+                                     default_value=False,
+                                     column_width=40)
+
         active = CheckboxField(show=True,
                                default_value=False,
                                column_width=40,
@@ -96,14 +100,18 @@ class ProfileModel(ModifiedBaseModel):
         begroeiingsvariant = ValueField(show=True,
                                         column_width=70,
                                         column_name='begr',
-                                        column_tooltip='begroeiingsvariant naam')
+                                        column_tooltip='begroeiingsvariant naam',
+                                        color_from='begroeiingsvariant_color')
+        begroeiingsvariant_color = ColorField(show=False,
+                                              default_value=(0, 0, 0, 0))
+
         score = ValueField(show=True,
                            column_width=45,
                            round=2,
                            column_name='sc',
                            column_tooltip='score')
         score_color = ColorField(show=False,
-                                      default_value=(0, 0, 0, 0))
+                                 default_value=(0, 0, 0, 0))
 
         over_depth = ValueField(show=True,
                                 column_width=45,

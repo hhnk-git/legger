@@ -46,6 +46,7 @@ except AttributeError:
 
 SHOW_ALL = 'alle'
 PRE_SELECTED = 'opgegeven'
+STANDARD = 'standaard'
 
 STRATEGY_THIS = 'dit hydrovak'
 STRATEGY_DONWSTREAM_ALL = 'benedenstr. altijd'
@@ -137,6 +138,7 @@ class LeggerWidget(QDockWidget):
         """Constructor."""
         super(LeggerWidget, self).__init__(parent)
 
+        log.warning('starting: init LeggerWidget')
         # store arguments
         self.iface = iface
         self.path_legger_db = path_legger_db
@@ -160,7 +162,9 @@ class LeggerWidget(QDockWidget):
             {'db_path': path_legger_db},
             'spatialite'
         )
+        log.warning('starting: create and check fields')
         db.create_and_check_fields()
+        log.warning('starting: get session')
         self.session = db.get_session()
         # todo: request something to test connection and through error message otherwise
         hydro_object_count = self.session.query(HydroObject).count()
@@ -175,8 +179,10 @@ class LeggerWidget(QDockWidget):
         self.active_begroeiings_variant_strategy = None
 
         # setup ui
+        log.warning('starting: setup ui')
         self.setup_ui(self)
 
+        log.info('starting: set data and models for ui')
         self.legger_model.setTreeWidget(self.legger_tree_widget)
         self.area_model.setTreeWidget(self.startpoint_tree_widget)
 
@@ -185,7 +191,7 @@ class LeggerWidget(QDockWidget):
         self.category_filter = 4
 
         self.begroeiings_varianten = OrderedDict(
-            [(SHOW_ALL, 'all'), (PRE_SELECTED, 'pre_selected'), ] +
+            [(SHOW_ALL, 'all'), (STANDARD, 'standard'), (PRE_SELECTED, 'pre_selected'), ] +
             [(v.naam, v) for v in self.session.query(BegroeiingsVariant)]
         )
 
@@ -211,6 +217,7 @@ class LeggerWidget(QDockWidget):
         self.child_selection_strategy_combo.insertItems(0, self.child_selection_strategies.keys())
         self.child_selection_strategy_combo.setCurrentIndex(0)
 
+        log.warning('starting: create line layer and add to map')
         # create line layer and add to map
         self.layer_manager = LeggerMapManager(self.iface, self.path_legger_db)
 
@@ -223,9 +230,11 @@ class LeggerWidget(QDockWidget):
         self.vl_selected_layer = self.layer_manager.get_selected_layer(add_to_map=True)
         self.vl_startpoint_hover_layer = self.layer_manager.get_hover_startpoint_layer(add_to_map=True)
 
+        log.warning('starting: map_visualisation')
         self.map_visualisation = LeggerMapVisualisation(
             self.iface, self.line_layer.crs())
 
+        log.warning('starting: clickTool')
         self.clickTool = clickTool(iface, self.vl_tree_layer, self.onMapClick)
         self.click_tool_active = False
         self.last_map_tool = None
@@ -236,13 +245,14 @@ class LeggerWidget(QDockWidget):
         # director = QgsVectorLayerDirector(
         #     line_direct, field_nr, '2', '1', '3', 3)
 
+        log.warning('starting: init network')
         self.network = Network(
             spatialite_path=path_legger_db,
             full_line_layer=self.line_layer,
             virtual_tree_layer=self.vl_tree_layer,
             endpoint_layer=self.vl_endpoint_layer
         )
-
+        log.warning('starting: add listeners')
         # add listeners
         self.category_combo.currentIndexChanged.connect(self.category_change)
         self.variant_model.dataChanged.connect(self.data_changed_variant)
@@ -270,6 +280,7 @@ class LeggerWidget(QDockWidget):
                 parent.appendChild(item)
                 loop_over(item, child)
 
+        log.warning('starting: get startingpoints and select first')
         # get startingpoints and select first
         sp_tree = self.network.get_start_arc_tree()
 
@@ -277,6 +288,7 @@ class LeggerWidget(QDockWidget):
         loop_over(root, sp_tree)
         self.area_model.setNewTree(root.childs)
 
+        log.warning('starting: initial, select first area')
         # initial, select first area
         first_area = root.child(0)
         self.area_model.setDataItemKey(first_area, 'selected', True)
@@ -297,6 +309,9 @@ class LeggerWidget(QDockWidget):
         self.init_talud = 2
         self.init_reason = ''
         self.selected_hydrovak_db = None
+
+        log.warning('starting: ready init LeggerWidget')
+        return
 
     def onMapClick(self, identifyFeatures):
         if len(identifyFeatures):
@@ -922,6 +937,13 @@ class LeggerWidget(QDockWidget):
         elif self.active_begroeiings_variant == PRE_SELECTED:
             var = var.filter(or_(Varianten.begroeiingsvariant == hydro_object.begroeiingsvariant,
                                  Varianten.id == selected_variant_id))
+        elif self.active_begroeiings_variant == STANDARD:
+            var = self.session.query(Varianten) \
+                .join(BegroeiingsVariant) \
+                .outerjoin(ProfielFiguren) \
+                .filter(Varianten.hydro == hydro_object) \
+                .filter(Varianten.standaard_profiel_code != None) \
+                .order_by(Varianten.diepte)
         elif self.active_begroeiings_variant is not None:
             var = var.filter(or_(BegroeiingsVariant.naam == self.active_begroeiings_variant,
                                  Varianten.id == selected_variant_id))
@@ -955,10 +977,12 @@ class LeggerWidget(QDockWidget):
                 prof_verhang = profile.verhang_inlaat
 
             profs.append({
+                'is_standaard': True if profile.standaard_profiel_code else False,
                 'name': profile.id,
                 'active': active,  # digits differ far after the
                 'depth': profile.diepte,
-                'begroeiingsvariant': profile.begroeiingsvariant.naam,
+                'begroeiingsvariant': profile.standaard_profiel_code if profile.standaard_profiel_code else profile.begroeiingsvariant.naam,
+                'begroeiingsvariant_color': [150, 150, 150] if profile.standaard_profiel_code else [255, 255, 255],
                 'score': profile.figuren[0].t_fit if profile.figuren else None,
                 'over_depth': over_depth if over_depth is not None else None,
                 'over_width': over_width if over_depth is not None else None,

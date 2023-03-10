@@ -64,5 +64,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :param iface: QgsInterface. A QGIS interface instance.
     """
     from .qgistools_plugin import Legger
+    from legger.utils.qlogging import setup_logging
 
+    setup_logging()
     return Legger(iface)
