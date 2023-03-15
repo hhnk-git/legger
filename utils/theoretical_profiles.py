@@ -16,7 +16,7 @@ Boundary Conditions
 Km = 25  # Manning coefficient in m**(1/3/s)
 Kb = 23  # Bos and Bijkerk coefficient in 1/s
 
-ini_waterdepth = 0.20  # Initial water depth (m).
+ini_waterdepth = 0.40  # Initial water depth (m).
 default_minimal_waterdepth = ini_waterdepth
 min_ditch_bottom_width = 0.5  # (m) Ditch bottom width can not be smaller dan 0,5m.
 default_minimal_bottom_width = min_ditch_bottom_width
@@ -420,13 +420,16 @@ def write_theoretical_profile_results_to_db(session, profile_results, gradient_n
 
     for row in profile_results.itertuples():
         # todo: add for manning
+
         try:
             if row.gradient > gradient_norm:
                 opmerkingen = "voldoet niet aan de norm."
             else:
                 opmerkingen = ""
         except Exception as e:
-            pass
+            log.warning('error bij check gradient %s - %s diepte: %s', row.object_id, row.water_depth, e)
+            opmerkingen = ""
+            row.gradient = None
 
         variant, new = get_or_create(
             session,

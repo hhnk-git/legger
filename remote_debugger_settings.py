@@ -2,7 +2,7 @@ try:
     import pydevd as pydevd_pycharm
 except ImportError:
     import sys
-    sys.path.append('C:\\Program Files\\JetBrains\\PyCharm 2021.2\\debug-eggs\\pydevd-pycharm.egg')
+    sys.path.append('C:\\Program Files\\JetBrains\\PyCharm 2022.3.2\\debug-eggs\\pydevd-pycharm.egg')
     import pydevd_pycharm
 
 
