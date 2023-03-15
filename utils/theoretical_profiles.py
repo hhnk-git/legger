@@ -16,8 +16,9 @@ Boundary Conditions
 Km = 25  # Manning coefficient in m**(1/3/s)
 Kb = 23  # Bos and Bijkerk coefficient in 1/s
 
-ini_waterdepth = 0.40  # Initial water depth (m).
+ini_waterdepth = 0.20  # Initial water depth (m).
 default_minimal_waterdepth = ini_waterdepth
+default_minimal_hydraulic_waterdepth = 0.10
 min_ditch_bottom_width = 0.5  # (m) Ditch bottom width can not be smaller dan 0,5m.
 default_minimal_bottom_width = min_ditch_bottom_width
 
@@ -139,7 +140,7 @@ def calc_manning(normative_flow, ditch_bottom_width, water_depth, slope, frictio
 def calc_profile_variants_for_all(hydro_objects,
                                   gradient_norm,
                                   gradient_norm_inlaat,
-                                  minimal_waterdepth=default_minimal_waterdepth,
+                                  minimal_waterdepth=default_minimal_hydraulic_waterdepth,
                                   minimal_bottom_width=None,
                                   store_all_from_depth=None,
                                   store_all_to_depth=None,
@@ -176,7 +177,7 @@ def calc_profile_variants_for_all(hydro_objects,
                     hydro_object=row,
                     gradient_norm=gradient_norm,
                     gradient_norm_inlaat=gradient_norm_inlaat,
-                    minimal_waterdepth=minimal_waterdepth,
+                    minimal_hydraulic_waterdepth=minimal_waterdepth,
                     minimal_bottom_width=minimal_bottom_width,
                     store_from_depth=from_depth,
                     store_to_depth=to_depth,
@@ -197,7 +198,7 @@ def calc_profile_variants_for_hydro_object(
         hydro_object,
         gradient_norm,
         gradient_norm_inlaat,
-        minimal_waterdepth=default_minimal_waterdepth,
+        minimal_hydraulic_waterdepth=default_minimal_waterdepth,
         minimal_bottom_width=None,
         store_from_depth=None,
         store_to_depth=None,
@@ -237,8 +238,8 @@ def calc_profile_variants_for_hydro_object(
                                         'normative_flow', 'gradient', 'friction_manning', 'friction_begroeiing',
                                         'begroeiingsdeel', 'surge', 'afvoer_leidend', 'verhang_inlaat'])
 
-    # minus 0.10, because in loop this is added
-    water_depth = store_from_depth - 0.10
+    # minus 0.05, because in loop this is added
+    water_depth = store_from_depth - 0.05
 
     go_on = True
     afvoer_leidend = 1
@@ -252,6 +253,9 @@ def calc_profile_variants_for_hydro_object(
             water_depth = water_depth + 0.20
 
         hydraulic_water_depth = water_depth - 0.20  # todo: check
+
+        if hydraulic_water_depth < minimal_hydraulic_waterdepth:
+            continue
 
         # initial values for finding profile which fits
         gradient_pitlo_griffioen = 1000
@@ -420,16 +424,21 @@ def write_theoretical_profile_results_to_db(session, profile_results, gradient_n
 
     for row in profile_results.itertuples():
         # todo: add for manning
-
+        gradient = row.gradient
         try:
-            if row.gradient > gradient_norm:
+            if gradient > gradient_norm:
                 opmerkingen = "voldoet niet aan de norm."
             else:
                 opmerkingen = ""
         except Exception as e:
-            log.warning('error bij check gradient %s - %s diepte: %s', row.object_id, row.water_depth, e)
-            opmerkingen = ""
-            row.gradient = None
+            log.error('error bij check gradient %s - %s diepte: %s', row.object_id, row.water_depth, e)
+            opmerkingen = str(e)
+            gradient = None
+
+        try:
+            gradient_inlaat = float(row.verhang_inlaat)
+        except Exception as e:
+            gradient_inlaat = None
 
         variant, new = get_or_create(
             session,
@@ -447,10 +456,10 @@ def write_theoretical_profile_results_to_db(session, profile_results, gradient_n
         variant.diepte = row.water_depth
         variant.waterbreedte = row.ditch_width
         variant.bodembreedte = row.ditch_bottom_width
-        variant.verhang = row.gradient
+        variant.verhang = gradient
         variant.opmerkingen = opmerkingen
         variant.afvoer_leidend = row.afvoer_leidend
-        variant.verhang_inlaat = row.verhang_inlaat
+        variant.verhang_inlaat = gradient_inlaat
 
         variant.hydraulische_diepte = row.hydraulic_water_depth
         variant.hydraulische_waterbreedte = row.hydraulic_ditch_width
