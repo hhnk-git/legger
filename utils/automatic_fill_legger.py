@@ -123,80 +123,79 @@ class AutomaticFillLegger(object):
 
     def add_default_variants(self, hydro_id, hydro_code, flow_profile_options, debiet, debiet_inlaat):
 
-        for profile_options in flow_profile_options.values():
-            for option in profile_options.get('varianten'):
-                begroeiingsvariant = self.begroeiingsvarianten[option.get('begroeiingsgraad')]
+        options = [opt for profile_options in flow_profile_options.values() for opt in profile_options.get('varianten')]
+        for option in options:
+            begroeiingsvariant = self.begroeiingsvarianten[option.get('begroeiingsgraad')]
 
-                option['verhang'] = calc_pitlo_griffioen(
-                    abs(debiet), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
-                    begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
-                    begroeiingsvariant['begroeiingsdeel']
-                )
-                option['verhang_inlaat'] = calc_pitlo_griffioen(
-                    abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
-                    begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
-                    begroeiingsvariant['begroeiingsdeel']
-                ) if debiet_inlaat is not None else None
+            option['verhang'] = calc_pitlo_griffioen(
+                abs(debiet), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
+                begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
+                begroeiingsvariant['begroeiingsdeel']
+            )
+            option['verhang_inlaat'] = calc_pitlo_griffioen(
+                abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
+                begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
+                begroeiingsvariant['begroeiingsdeel']
+            ) if debiet_inlaat is not None else None
 
-            self._db_cursor.executemany("""
-                    INSERT INTO varianten (
-                    id,
-                    begroeiingsvariant_id, 
-                    diepte, waterbreedte, bodembreedte, talud,
-                    verhang, verhang_inlaat,
-                    hydraulische_diepte, hydraulische_waterbreedte, hydraulische_bodembreedte, hydraulische_talud,
-                    hydro_id, standaard_profiel_code) 
-                    VALUES 
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT (id) DO 
-                    UPDATE SET
-                        begroeiingsvariant_id = excluded.begroeiingsvariant_id,
-                        diepte = excluded.diepte,
-                        waterbreedte = excluded.waterbreedte,
-                        bodembreedte = excluded.bodembreedte,
-                        talud = excluded.talud,
-                        verhang = excluded.verhang,
-                        verhang_inlaat = excluded.verhang_inlaat,
-                        hydraulische_diepte = excluded.hydraulische_diepte,
-                        hydraulische_waterbreedte = excluded.hydraulische_waterbreedte,
-                        hydraulische_bodembreedte = excluded.hydraulische_bodembreedte
-                                """, [(
-                f'{hydro_code}_stand_{option.get("profiel_code")}',
-                self.begroeiingsvariant_mapping.get(option.get('begroeiingsgraad')),
-                option.get('ldiepte'),
-                option.get('lwbreedte'),
-                option.get('lbbreedte'),
-                option.get('ltalud'),
-                option.get('verhang'),
-                option.get('varhang_inlaat'),
-                option.get('hdiepte'),
-                option.get('hwbreedte'),
-                option.get('hbbreedte'),
-                option.get('htalud'),
-                hydro_id,
-                option.get('profiel_code'),
+        self._db_cursor.executemany("""
+                INSERT INTO varianten (
+                id,
+                begroeiingsvariant_id, 
+                diepte, waterbreedte, bodembreedte, talud,
+                verhang, verhang_inlaat,
+                hydraulische_diepte, hydraulische_waterbreedte, hydraulische_bodembreedte, hydraulische_talud,
+                hydro_id, standaard_profiel_code) 
+                VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO 
+                UPDATE SET
+                    begroeiingsvariant_id = excluded.begroeiingsvariant_id,
+                    diepte = excluded.diepte,
+                    waterbreedte = excluded.waterbreedte,
+                    bodembreedte = excluded.bodembreedte,
+                    talud = excluded.talud,
+                    verhang = excluded.verhang,
+                    verhang_inlaat = excluded.verhang_inlaat,
+                    hydraulische_diepte = excluded.hydraulische_diepte,
+                    hydraulische_waterbreedte = excluded.hydraulische_waterbreedte,
+                    hydraulische_bodembreedte = excluded.hydraulische_bodembreedte
+                """, [(
+            f'{hydro_code}_stand_{option.get("profiel_code")}',
+            self.begroeiingsvariant_mapping.get(option.get('begroeiingsgraad')),
+            option.get('ldiepte'),
+            option.get('lwbreedte'),
+            option.get('lbbreedte'),
+            option.get('ltalud'),
+            option.get('verhang'),
+            option.get('varhang_inlaat'),
+            option.get('hdiepte'),
+            option.get('hwbreedte'),
+            option.get('hbbreedte'),
+            option.get('htalud'),
+            hydro_id,
+            option.get('profiel_code'),
 
-            ) for option in profile_options.get('varianten')])
+        ) for option in options])
 
-            self._db_cursor.connection.commit()
-            self._db_cursor.execute("""
-                SELECT id, standaard_profiel_code
-                FROM varianten
-                WHERE standaard_profiel_code IS NOT NULL AND hydro_id = ?
-            """, [hydro_id])
+        self._db_cursor.connection.commit()
+        self._db_cursor.execute("""
+            SELECT id, standaard_profiel_code
+            FROM varianten
+            WHERE standaard_profiel_code IS NOT NULL AND hydro_id = ?
+        """, [hydro_id])
 
-            available = dict([(a[1], a[0]) for a in self._db_cursor.fetchall()])
+        available = dict([(a[1], a[0]) for a in self._db_cursor.fetchall()])
 
-            for profiel_option in profile_options.get('varianten'):
-                profiel_option['variant_id'] = available.get(profiel_option.get('profiel_code'))
+        for option in options:
+            option['variant_id'] = available.get(option.get('profiel_code'))
 
-            a = 1
 
     def save_to_database(self, selected_variants):
 
         items = [(selected['hydrovak'].get('id'), selected['option'].get('variant_id'))
                  for code, selected in selected_variants.items() if
-                 selected is not None and selected['option'].get('variant_id') is not None]
+                 selected is not None and selected['option'].get('variant') is not None]
 
         self._db_cursor.executemany("""
         INSERT INTO geselecteerd(hydro_id, variant_id, selected_on)
@@ -250,6 +249,7 @@ class AutomaticFillLegger(object):
                 return None
 
             options_out = options[selected_debiet]
+            return options_out
 
         for hydrovak in hydrovakken:
 
@@ -266,9 +266,6 @@ class AutomaticFillLegger(object):
             profiel_breedte = hydrovak.get('breedte')
             profiel_diepte = hydrovak.get('diepte')
             debiet_def = max(abs(debiet if debiet else 0.0), abs(debiet_inlaat if debiet_inlaat else 0.0))
-
-            if code == 'OAF-C-4217':
-                a = 1
 
             profile_options_grondsoort = get_profile_options(grondsoort)
             profile_options = filter_options_on_debiet(profile_options_grondsoort, debiet_def)
@@ -296,8 +293,6 @@ class AutomaticFillLegger(object):
         # voor nu de eerste optie
         for key, items in hydrovak_selected.items():
 
-            if key == 'OAF-C-4217':
-                a = 1
             if len(items):
                 selected = items[0]
             else:
