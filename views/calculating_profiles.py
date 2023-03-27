@@ -1,8 +1,7 @@
 # todo:
 #  - 'opstuwingsnorm' selection?
 #  - correct or selectable friction values
-
-
+import datetime
 # -*- coding: utf-8 -*-
 
 import logging
@@ -285,27 +284,32 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         opstuw_norm = float(self.surge_combo_box.currentText())
         opstuw_norm_inlaat = float(self.surge_combo_inlaat_box.currentText())
 
+        self.feedbackmessage = "";
         for bv in session.query(BegroeiingsVariant).all():
+            profiles = None
 
             try:
+                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Start profielen berekening voor {bv.naam}."
                 profiles = create_theoretical_profiles(self.polder_datasource, opstuw_norm, opstuw_norm_inlaat, bv)
-                self.feedbackmessage = "Profielen zijn berekend."
+                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Profielen zijn berekend."
             except Exception as e:
+                # raise e
                 log.error(e)
-                self.feedbackmessage = "Fout, profielen konden niet worden berekend."
+                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Fout, profielen konden niet worden berekend. melding: {e}"
             finally:
                 self.feedbacktext.setText(self.feedbackmessage)
 
-            try:
-                write_theoretical_profile_results_to_db(session, profiles, opstuw_norm, bv)
-                self.feedbackmessage = self.feedbackmessage + ("\nProfielen opgeslagen in legger db.")
+            if profiles is not None:
+                try:
+                    write_theoretical_profile_results_to_db(session, profiles, opstuw_norm, bv)
+                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()} - Profielen opgeslagen in legger db."
 
-            except Exception as e:
-                log.error(e)
-                self.feedbackmessage = self.feedbackmessage + ("\nFout, profielen niet opgeslagen in legger database. melding: {}")
-                raise e
-            finally:
-                self.feedbacktext.setText(self.feedbackmessage)
+                except Exception as e:
+                    log.error(e)
+                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()} - Fout, profielen niet opgeslagen in legger database. melding: {e}"
+                    # raise e
+                finally:
+                    self.feedbacktext.setText(self.feedbackmessage)
 
     def execute_step3(self):
 
@@ -331,7 +335,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         except Exception as e:
             log.exception(e)
             self.feedbacktext.setText("fout bij invullen")
-            raise e
+            # raise e
         else:
             self.feedbacktext.setText("legger is ingevuld")
 
