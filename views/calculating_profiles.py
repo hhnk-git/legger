@@ -96,12 +96,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         # surge combobox
         self.last_surge_text = "kies opstuwingsnorm"
 
-        # fill surge combobox
-        surge_choices = ['%s' % s for s in [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]]
-        self.surge_combo_box.insertItems(0, surge_choices)
-        self.surge_combo_box.setCurrentIndex(3)
-        self.surge_combo_inlaat_box.insertItems(0, surge_choices)
-        self.surge_combo_inlaat_box.setCurrentIndex(3)
 
     def timestep_selection_change(self, nr):
         """Proces new selected timestep in combobox
@@ -281,10 +275,10 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # session.query('Select * FROM varianten')
 
-        opstuw_norm = float(self.surge_combo_box.currentText())
-        opstuw_norm_inlaat = float(self.surge_combo_inlaat_box.currentText())
+        opstuw_norm = 3.0
+        opstuw_norm_inlaat = 3.0
 
-        self.feedbackmessage = "";
+        self.feedbackmessage = ""
         for bv in session.query(BegroeiingsVariant).all():
             profiles = None
 
@@ -334,10 +328,10 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
             automatic_fill_legger(self.polder_datasource)
         except Exception as e:
             log.exception(e)
-            self.feedbacktext.setText("fout bij invullen")
+            self.feedbacktext.setText("fout bij toevoegen standaard profielen en invullen waar mogelijk")
             # raise e
         else:
-            self.feedbacktext.setText("legger is ingevuld")
+            self.feedbacktext.setText("standaard profielen toegevoegd en ingevuld waar mogelijk")
 
     def run_all(self):
         self.execute_snap_points()
@@ -345,6 +339,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.execute_redirect_flows()
         time.sleep(1)
         self.execute_step2()
+        time.sleep(1)
+        self.execute_pre_fill()
         time.sleep(1)
         self.execute_step3()
         self.feedbacktext.setText("Alle taken uitgevoerd.")
@@ -403,8 +399,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # surge selection:
         self.form_row = QtWidgets.QGridLayout(self)
-        self.surge_combo_box = QComboBox(self)
-        self.surge_combo_inlaat_box = QComboBox(self)
 
         # Assembling step 2 row
         self.step2_button = QtWidgets.QPushButton(self)
@@ -413,21 +407,18 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.step2_explanation_button = QtWidgets.QPushButton(self)
         self.step2_explanation_button.setObjectName("uitleg_stap2")
         self.step2_explanation_button.clicked.connect(self.explain_step2)
+        self.pre_fill_button = QtWidgets.QPushButton(self)
+        self.pre_fill_button.setObjectName("pre fill profiles")
+        self.pre_fill_button.clicked.connect(self.execute_pre_fill)
 
         self.groupBox_step2 = QtWidgets.QGroupBox(self)
         self.groupBox_step2.setTitle("Stap 3: bereken profielvarianten")
         self.box_step2 = QtWidgets.QVBoxLayout()
         self.box_step2.addLayout(self.form_row)
-        lbl = QtWidgets.QLabel(self)
-        lbl.setText("Max verhang afvoer [cm/km]")
-        self.form_row.addWidget(lbl, 0, 0)
-        self.form_row.addWidget(self.surge_combo_box, 0, 1)
-        lbl = QtWidgets.QLabel(self)
-        lbl.setText("Max verhang inlaat [cm/km]")
-        self.form_row.addWidget(lbl, 1, 0)
-        self.form_row.addWidget(self.surge_combo_inlaat_box, 1, 1)
 
         self.box_step2.addWidget(self.step2_button)
+        self.box_step2.addWidget(self.pre_fill_button)
+
         self.box_step2.addWidget(self.step2_explanation_button)
         self.groupBox_step2.setLayout(self.box_step2)  # box toevoegen aan groupbox
 
@@ -441,17 +432,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.box_step3.addWidget(self.step3_button)
         self.groupBox_step3.setLayout(self.box_step3)  # box toevoegen aan groupbox
         self.bottom_row.addWidget(self.groupBox_step3)
-
-        # Assembling step 5 row
-        self.pre_fill_button = QtWidgets.QPushButton(self)
-        self.pre_fill_button.setObjectName("pre fill profiles")
-        self.pre_fill_button.clicked.connect(self.execute_pre_fill)
-        self.groupBox_pre_fill = QtWidgets.QGroupBox(self)
-        self.groupBox_pre_fill.setTitle("Stap 5: invullen waar evident	")
-        self.box_pre_fill = QtWidgets.QHBoxLayout()
-        self.box_pre_fill.addWidget(self.pre_fill_button)
-        self.groupBox_pre_fill.setLayout(self.box_pre_fill)  # box toevoegen aan groupbox
-        self.bottom_row.addWidget(self.groupBox_pre_fill)
 
         # Assembling run all
         self.run_all_button = QtWidgets.QPushButton(self)
@@ -554,7 +534,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.step3_button.setText("Bereken de fit van de berekende profielen")
         self.snap_points_button.setText("Snap eindpunten van lijnen")
 
-        self.pre_fill_button.setText("Vul profielen in waar duidelijk")
+        self.pre_fill_button.setText("Standaard profielen toevoegen en invullen waar mogelijk")
         self.run_all_button.setText("Run alle taken achter elkaar")
         self.run_post_process_button.setText("Verhang op basis van gekozen legger")
 
