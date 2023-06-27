@@ -22,6 +22,18 @@ default_minimal_hydraulic_waterdepth = 0.10
 min_ditch_bottom_width = 0.5  # (m) Ditch bottom width can not be smaller dan 0,5m.
 default_minimal_bottom_width = min_ditch_bottom_width
 
+
+def get_gradient_norm(grondsoort):
+    """
+    Get the gradient norm for the given soil type.
+    maximal allowable gradient in waterway in cm/km
+    """
+    if grondsoort == 'veenweide':
+        return 2.0
+    else:
+        return 3.0
+
+
 """
 General Definitions
 """
@@ -139,8 +151,6 @@ def calc_manning(normative_flow, ditch_bottom_width, water_depth, slope, frictio
 
 def calc_profile_variants_for_hydro_object(
         hydro_object,
-        gradient_norm,
-        gradient_norm_inlaat,
         minimal_hydraulic_waterdepth=default_minimal_waterdepth,
         minimal_bottom_width=None,
         store_from_depth=None,
@@ -167,6 +177,9 @@ def calc_profile_variants_for_hydro_object(
 
     hydraulic_slope = slope
 
+    gradient_norm = get_gradient_norm(grondsoort)
+    gradient_norm_inlaat = gradient_norm
+
     # if max_ditch_width is None:
     #     raise ValueError("hydro object value 'max_ditch_width' must be a value (not None or 0).")
     if normative_flow is None or pd.isnull(normative_flow):
@@ -180,7 +193,8 @@ def calc_profile_variants_for_hydro_object(
                                         'hydraulic_water_depth', 'hydraulic_ditch_width',
                                         'hydraulic_ditch_bottom_width', 'hydraulic_slope',
                                         'normative_flow', 'gradient', 'friction_manning', 'friction_begroeiing',
-                                        'begroeiingsdeel', 'surge', 'afvoer_leidend', 'verhang_inlaat'])
+                                        'begroeiingsdeel', 'surge', 'afvoer_leidend', 'verhang_inlaat',
+                                        'gradient_norm',])
 
     # minus 0.05, because in loop this is added
     water_depth = store_from_depth - 0.05
@@ -274,7 +288,8 @@ def calc_profile_variants_for_hydro_object(
             begroeiingsdeel,
             length * gradient_pitlo_griffioen / 1000,
             afvoer_leidend,
-            gradient_pitlo_griffioen_inlaat
+            gradient_pitlo_griffioen_inlaat,
+            gradient_norm
         ]
 
         variants_table = variants_table.append(
@@ -287,12 +302,11 @@ def calc_profile_variants_for_hydro_object(
     return variants_table
 
 
-def create_theoretical_profiles(legger_db_filepath, gradient_norm, gradient_norm_inlaat, bv):
+def create_theoretical_profiles(legger_db_filepath, bv):
     """
     main function for calculation of theoretical profiles
 
     legger_db_filepath (str): path to legger profile
-    gradient_norm (float): maximal allowable gradient in waterway in cm/km
     bv (Begroeiingsvariant model instance): Begroeiingsvariant (with friction value) for calculation
 
     return: calculated profile variant
@@ -343,14 +357,10 @@ def create_theoretical_profiles(legger_db_filepath, gradient_norm, gradient_norm
     default_slope = {cat['categorie']: cat['default_talud'] for cat in all_categories
                      if cat['default_talud'] is not None}
 
-    for category, slope in default_slope.items():
-        hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.category == category), 'slope'] = slope
-
-    hydro_objects.loc[(hydro_objects.grondsoort == "veenweide") & (
-                hydro_objects.slope < 3.0), 'slope'] = 3.0  # wordt dit gebruikt? Gaat nu toch met taludvoorkeur?
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 2.0
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort == "veenweide"), 'slope'] = 3.0
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
     hydro_objects.zpeil_diff = pd.to_numeric(hydro_objects.zpeil_diff, downcast='float', errors='coerce')
@@ -381,8 +391,6 @@ def create_theoretical_profiles(legger_db_filepath, gradient_norm, gradient_norm
             variants_table = variants_table.append(
                 calc_profile_variants_for_hydro_object(
                     hydro_object=row,
-                    gradient_norm=gradient_norm,
-                    gradient_norm_inlaat=gradient_norm_inlaat,
                     minimal_hydraulic_waterdepth=default_minimal_waterdepth,
                     minimal_bottom_width=default_minimal_bottom_width,
                     store_from_depth=from_depth,
@@ -404,26 +412,33 @@ def create_theoretical_profiles(legger_db_filepath, gradient_norm, gradient_norm
     return profile_variants
 
 
-def write_theoretical_profile_results_to_db(session, profile_results, gradient_norm, bv):
+def write_theoretical_profile_results_to_db(session, profile_results, bv):
     log.info("Writing output to db...\n")
 
     for row in profile_results.itertuples():
         # todo: add for manning
         gradient = row.gradient
         try:
+            gradient_inlaat = float(row.verhang_inlaat)
+        except Exception as e:
+            gradient_inlaat = None
+
+        try:
+            gradient_norm = float(row.gradient_norm)
+        except Exception as e:
+            gradient_inlaat = None
+
+        try:
             if gradient > gradient_norm:
                 opmerkingen = "voldoet niet aan de norm."
+            elif gradient_inlaat > gradient_norm:
+                opmerkingen = "inlaat voldoet niet aan de norm."
             else:
                 opmerkingen = ""
         except Exception as e:
             log.error('error bij check gradient %s - %s diepte: %s', row.object_id, row.water_depth, e)
             opmerkingen = str(e)
             gradient = None
-
-        try:
-            gradient_inlaat = float(row.verhang_inlaat)
-        except Exception as e:
-            gradient_inlaat = None
 
         variant, new = get_or_create(
             session,

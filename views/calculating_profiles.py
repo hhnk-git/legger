@@ -275,32 +275,29 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # session.query('Select * FROM varianten')
 
-        opstuw_norm = 3.0
-        opstuw_norm_inlaat = 3.0
-
         self.feedbackmessage = ""
         for bv in session.query(BegroeiingsVariant).all():
             profiles = None
 
             try:
-                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Start profielen berekening voor {bv.naam}."
-                profiles = create_theoretical_profiles(self.polder_datasource, opstuw_norm, opstuw_norm_inlaat, bv)
-                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Profielen zijn berekend."
+                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Start profielen berekening voor {bv.naam}."
+                profiles = create_theoretical_profiles(self.polder_datasource, bv)
+                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Profielen zijn berekend."
             except Exception as e:
                 # raise e
                 log.error(e)
-                self.feedbackmessage = self.feedbackmessage + f"{datetime.datetime.now().isoformat()} - Fout, profielen konden niet worden berekend. melding: {e}"
+                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen konden niet worden berekend. melding: {e}"
             finally:
                 self.feedbacktext.setText(self.feedbackmessage)
 
             if profiles is not None:
                 try:
-                    write_theoretical_profile_results_to_db(session, profiles, opstuw_norm, bv)
-                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()} - Profielen opgeslagen in legger db."
+                    write_theoretical_profile_results_to_db(session, profiles, bv)
+                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Profielen opgeslagen in legger db."
 
                 except Exception as e:
                     log.error(e)
-                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()} - Fout, profielen niet opgeslagen in legger database. melding: {e}"
+                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen niet opgeslagen in legger database. melding: {e}"
                     # raise e
                 finally:
                     self.feedbacktext.setText(self.feedbackmessage)

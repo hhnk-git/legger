@@ -100,7 +100,7 @@ class LeggerDatabase(object):
                 engine = self.engine
 
             metadata.bind = engine
-            metadata.reflect(extend_existing=True)
+            metadata.reflect(extend_existing=True, bind=engine)
             return metadata
         else:
             if self._base_metadata is None:
@@ -157,7 +157,7 @@ class LeggerDatabase(object):
                 engine = self.engine
 
             metadata.bind = engine
-            metadata.reflect(extend_existing=True)
+            metadata.reflect(extend_existing=True, bind=engine)
             return metadata
         else:
             if self._base_metadata is None:

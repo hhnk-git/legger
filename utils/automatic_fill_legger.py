@@ -3,7 +3,7 @@ import os.path
 from copy import deepcopy
 
 from legger.utils.spatialite import load_spatialite
-from legger.utils.theoretical_profiles import calc_pitlo_griffioen
+from legger.utils.theoretical_profiles import calc_pitlo_griffioen, get_gradient_norm
 
 
 class AutomaticFillLegger(object):
@@ -60,7 +60,8 @@ class AutomaticFillLegger(object):
                 k.diepte,
                 k.breedte,
                 k.lengte,
-                k.grondsoort
+                k.grondsoort,
+                (ho.zomerpeil - ho.streefpeil) as zpeil_diff
             FROM 
                 hydroobject ho 
             INNER JOIN kenmerken k ON k.hydro_id = ho.id
@@ -73,7 +74,8 @@ class AutomaticFillLegger(object):
                 diepte=r[3],
                 breedte=r[4],
                 lengte=r[5],
-                grondsoort=r[6]
+                grondsoort=r[6],
+                zpeil_diff=r[7]
             )
             for nr, r in enumerate(self._db_cursor.fetchall())]
 
@@ -121,7 +123,7 @@ class AutomaticFillLegger(object):
             }
         return self._begroeiingsvariant
 
-    def add_default_variants(self, hydro_id, hydro_code, flow_profile_options, debiet, debiet_inlaat):
+    def add_default_variants(self, hydro_id, hydro_code, flow_profile_options, debiet, debiet_inlaat, zpeil_diff=0.0):
 
         options = [opt for profile_options in flow_profile_options.values() for opt in profile_options.get('varianten')]
         for option in options:
@@ -132,8 +134,10 @@ class AutomaticFillLegger(object):
                 begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
                 begroeiingsvariant['begroeiingsdeel']
             )
+
             option['verhang_inlaat'] = calc_pitlo_griffioen(
-                abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
+                abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')) + zpeil_diff,
+                float(option.get('htalud')),
                 begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
                 begroeiingsvariant['begroeiingsdeel']
             ) if debiet_inlaat is not None else None
@@ -189,7 +193,6 @@ class AutomaticFillLegger(object):
 
         for option in options:
             option['variant_id'] = available.get(option.get('profiel_code'))
-
 
     def save_to_database(self, selected_variants):
 
@@ -265,12 +268,19 @@ class AutomaticFillLegger(object):
             grondsoort = hydrovak.get('grondsoort')
             profiel_breedte = hydrovak.get('breedte')
             profiel_diepte = hydrovak.get('diepte')
+            zpeil_diff = hydrovak.get('zpeil_diff')
+
+            if not zpeil_diff:
+                zpeil_diff = 0.0
+
             debiet_def = max(abs(debiet if debiet else 0.0), abs(debiet_inlaat if debiet_inlaat else 0.0))
 
             profile_options_grondsoort = get_profile_options(grondsoort)
-            profile_options = filter_options_on_debiet(profile_options_grondsoort, debiet_def)
 
-            self.add_default_variants(hydro_id, code, profile_options_grondsoort, debiet, debiet_inlaat)
+            # verhang and verhang_inlaat will be added to profile_options_grondsoort
+            self.add_default_variants(hydro_id, code, profile_options_grondsoort, debiet, debiet_inlaat, zpeil_diff)
+
+            profile_options = filter_options_on_debiet(profile_options_grondsoort, debiet_def)
 
             if profile_options is None:
                 continue
@@ -281,19 +291,25 @@ class AutomaticFillLegger(object):
             varianten = profile_options.get('varianten')
             varianten.reverse()
             if profiel_breedte is not None and profiel_diepte is not None:
+                gradient_norm = get_gradient_norm(grondsoort)
                 for option in varianten:
-                    if (float(option.get("lwbreedte")) <= profiel_breedte and
-                            float(option.get("ldiepte")) <= profiel_diepte):
+                    if (float(option.get("lwbreedte")) <= profiel_breedte
+                            and float(option.get("ldiepte")) <= profiel_diepte
+                    ):
                         hydrovak_selected[code].append({
                             'option': option,
-                            'hydrovak': hydrovak
+                            'hydrovak': hydrovak,
+                            'gradient_inlaat_ok': (not option.get("verhang_inlaat")
+                                                   or float(option.get("verhang_inlaat")) <= gradient_norm)
                         })
 
         # netwerk analyses om meerdere opties te toetsen op diepte.
         # voor nu de eerste optie
         for key, items in hydrovak_selected.items():
 
-            if len(items):
+            valid_items = [item for item in items if item.get('gradient_inlaat_ok')]
+
+            if len(valid_items):
                 selected = items[0]
             else:
                 selected = None

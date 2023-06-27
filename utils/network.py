@@ -812,6 +812,10 @@ class Network(object):
         node_queue = OrderedDict([(node.id, node) for node in self.graph.get_endnodes(modus=Definitions.FORCED)])
         # remove duplicates
 
+        if node_queue is None or len(node_queue) == 0:
+            raise Exception('lijst met eindpunten is leeg?!.')
+            # return False, []
+
         last_node = list(node_queue.values())[-1]
 
         c_last_repeated = 0
