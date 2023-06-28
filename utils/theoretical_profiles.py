@@ -256,13 +256,27 @@ def calc_profile_variants_for_hydro_object(
                     abs(debiet_inlaat), hydraulic_ditch_bottom_width, hydraulic_water_depth + zpeil_diff,
                     hydraulic_slope,
                     friction_manning, friction_begroeiing, begroeiingsdeel)
-                if gradient_pitlo_griffioen_inlaat > gradient_norm_inlaat:
-                    afvoer_leidend = 0
+            else:
+                # skip calculation in loop, if normal gradient is already to high
+                gradient_pitlo_griffioen_inlaat = 0
 
             # loop until gradient is lower than norm or profile gets wider than max_width
             # if first try is wider, this (to wide) profile is stored
             if ditch_width + 0.0 > max_ditch_width:
                 break
+
+        if debiet_inlaat is None:
+            gradient_pitlo_griffioen_inlaat = None
+        if debiet_inlaat == 0.0:
+            gradient_pitlo_griffioen_inlaat = 0.0
+        else:
+            # check inlaat
+            gradient_pitlo_griffioen_inlaat = calc_pitlo_griffioen(
+                abs(debiet_inlaat), hydraulic_ditch_bottom_width, hydraulic_water_depth + zpeil_diff,
+                hydraulic_slope,
+                friction_manning, friction_begroeiing, begroeiingsdeel)
+            if gradient_pitlo_griffioen_inlaat > gradient_pitlo_griffioen:
+                afvoer_leidend = 0
 
         if hydraulic_water_depth < minimal_hydraulic_waterdepth:
             continue

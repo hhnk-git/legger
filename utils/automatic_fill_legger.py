@@ -61,7 +61,8 @@ class AutomaticFillLegger(object):
                 k.breedte,
                 k.lengte,
                 k.grondsoort,
-                (ho.zomerpeil - ho.streefpeil) as zpeil_diff
+                (ho.zomerpeil - ho.streefpeil) as zpeil_diff,
+                ho.debiet_inlaat
             FROM 
                 hydroobject ho 
             INNER JOIN kenmerken k ON k.hydro_id = ho.id
@@ -75,7 +76,8 @@ class AutomaticFillLegger(object):
                 breedte=r[4],
                 lengte=r[5],
                 grondsoort=r[6],
-                zpeil_diff=r[7]
+                zpeil_diff=r[7],
+                debiet_inlaat=r[8],
             )
             for nr, r in enumerate(self._db_cursor.fetchall())]
 
@@ -135,12 +137,14 @@ class AutomaticFillLegger(object):
                 begroeiingsvariant['begroeiingsdeel']
             )
 
-            option['verhang_inlaat'] = calc_pitlo_griffioen(
-                abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')) + zpeil_diff,
-                float(option.get('htalud')),
-                begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
-                begroeiingsvariant['begroeiingsdeel']
-            ) if debiet_inlaat is not None else None
+            if debiet_inlaat is not None:
+                option['verhang_inlaat'] = calc_pitlo_griffioen(
+                    abs(debiet_inlaat), float(option.get('hbbreedte')), float(option.get('hdiepte')) + zpeil_diff,
+                    float(option.get('htalud')),
+                    begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
+                    begroeiingsvariant['begroeiingsdeel'])
+            else:
+                option['verhang_inlaat'] = None
 
         self._db_cursor.executemany("""
                 INSERT INTO varianten (
@@ -172,7 +176,7 @@ class AutomaticFillLegger(object):
             option.get('lbbreedte'),
             option.get('ltalud'),
             option.get('verhang'),
-            option.get('varhang_inlaat'),
+            option.get('verhang_inlaat'),
             option.get('hdiepte'),
             option.get('hwbreedte'),
             option.get('hbbreedte'),
@@ -280,6 +284,7 @@ class AutomaticFillLegger(object):
             # verhang and verhang_inlaat will be added to profile_options_grondsoort
             self.add_default_variants(hydro_id, code, profile_options_grondsoort, debiet, debiet_inlaat, zpeil_diff)
 
+            # todo: logisch om hier ook te filteren op inlaat debiet (door ander peil hoeft dit niet leidend te zijn)?
             profile_options = filter_options_on_debiet(profile_options_grondsoort, debiet_def)
 
             if profile_options is None:
