@@ -130,6 +130,7 @@ class AutomaticFillLegger(object):
         options = [opt for profile_options in flow_profile_options.values() for opt in profile_options.get('varianten')]
         for option in options:
             begroeiingsvariant = self.begroeiingsvarianten[option.get('begroeiingsgraad')]
+            option['afvoer_leidend'] = 1
 
             option['verhang'] = calc_pitlo_griffioen(
                 abs(debiet), float(option.get('hbbreedte')), float(option.get('hdiepte')), float(option.get('htalud')),
@@ -143,8 +144,13 @@ class AutomaticFillLegger(object):
                     float(option.get('htalud')),
                     begroeiingsvariant['friction_manning'], begroeiingsvariant['friction_begroeiing'],
                     begroeiingsvariant['begroeiingsdeel'])
+
+                if option['verhang_inlaat'] > option['verhang']:
+                    option['afvoer_leidend'] = 0
+
             else:
                 option['verhang_inlaat'] = None
+
 
         self._db_cursor.executemany("""
                 INSERT INTO varianten (
@@ -152,10 +158,11 @@ class AutomaticFillLegger(object):
                 begroeiingsvariant_id, 
                 diepte, waterbreedte, bodembreedte, talud,
                 verhang, verhang_inlaat,
-                hydraulische_diepte, hydraulische_waterbreedte, hydraulische_bodembreedte, hydraulische_talud,
+                hydraulische_diepte, hydraulische_waterbreedte, hydraulische_bodembreedte, hydraulische_talud, 
+                afvoer_leidend,
                 hydro_id, standaard_profiel_code) 
                 VALUES 
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO 
                 UPDATE SET
                     begroeiingsvariant_id = excluded.begroeiingsvariant_id,
@@ -167,7 +174,8 @@ class AutomaticFillLegger(object):
                     verhang_inlaat = excluded.verhang_inlaat,
                     hydraulische_diepte = excluded.hydraulische_diepte,
                     hydraulische_waterbreedte = excluded.hydraulische_waterbreedte,
-                    hydraulische_bodembreedte = excluded.hydraulische_bodembreedte
+                    hydraulische_bodembreedte = excluded.hydraulische_bodembreedte,
+                    afvoer_leidend = excluded.afvoer_leidend
                 """, [(
             f'{hydro_code}_stand_{option.get("profiel_code")}',
             self.begroeiingsvariant_mapping.get(option.get('begroeiingsgraad')),
@@ -181,9 +189,9 @@ class AutomaticFillLegger(object):
             option.get('hwbreedte'),
             option.get('hbbreedte'),
             option.get('htalud'),
+            option.get('afvoer_leidend'),
             hydro_id,
             option.get('profiel_code'),
-
         ) for option in options])
 
         self._db_cursor.connection.commit()
