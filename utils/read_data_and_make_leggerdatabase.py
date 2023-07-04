@@ -152,7 +152,7 @@ class CreateLeggerSpatialite(object):
         # vullen profielen
         session.execute("""
         INSERT INTO profielen  (proident, bron_profiel, pro_id, hydro_id)
-        SELECT proident, osmomsch, pro_id, ho.hydroobject_id as hydroobject_id
+        SELECT proident, pro.osmomsch, pro_id, ho.hydroobject_id as hydroobject_id
         FROM imp_gw_pro pro
         LEFT JOIN imp_hydroobject ho ON st_intersects(pro.geometry, ho.geometry)  
         where betrouwbaar = 1
@@ -172,8 +172,8 @@ class CreateLeggerSpatialite(object):
             hydro_id)
         SELECT 
             hydroobject_id as id,
-            CASE WHEN winterpeil IS NOT NULL AND ws_bodemhoogte IS NOT NULL THEN winterpeil - ws_bodemhoogte END as diepte, 
-            ws_bodemhoogte as bodemhoogte,
+            diepte as diepte, 
+            bodemhoogtenap as bodemhoogte,
             breedte as waterbreedte,
             ST_Length(geometry) as lengte,
             taludvoorkeur as talud_voorkeur,
@@ -307,7 +307,7 @@ WITH
             WITH 
                 max_diepte as (Select pr.hydro_id as hydro_id, min(pp.iws_hoogte) as bodemhoogte, ho.streefpeil - min(pp.iws_hoogte)  as diepte, 'meting' as bron
                 from profielpunten pp, profielen pr, hydroobject ho
-                where pp.pro_pro_id = pr.pro_id AND ho.id = pr.hydro_id AND osmomsch='Z1'
+                where pp.pro_pro_id = pr.pro_id AND ho.id = pr.hydro_id AND pp.osmomsch='Z1'
                 group by pr.hydro_id)
 
             UPDATE kenmerken
