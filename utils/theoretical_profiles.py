@@ -28,7 +28,7 @@ def get_gradient_norm(grondsoort):
     Get the gradient norm for the given soil type.
     maximal allowable gradient in waterway in cm/km
     """
-    if grondsoort == 'veenweide':
+    if 'veen' in grondsoort.lower():
         return 2.0
     else:
         return 3.0
@@ -229,11 +229,11 @@ def calc_profile_variants_for_hydro_object(
             hydraulic_ditch_bottom_width = ditch_bottom_width
 
             ditch_width = ditch_bottom_width + water_depth * slope * 2.0
-            if grondsoort == 'veenweide':
-                if ditch_width >= 6:
-                    hydraulic_water_depth = water_depth - 0.35
+            if 'veen' in grondsoort.lower():
+                if ditch_width >= 2:
+                    hydraulic_water_depth = water_depth - 0.15
                 else:
-                    hydraulic_water_depth = water_depth - 0.25
+                    hydraulic_water_depth = water_depth - 0.10
             else:
                 if ditch_width >= 6:
                     hydraulic_water_depth = water_depth - 0.20
@@ -373,7 +373,7 @@ def create_theoretical_profiles(legger_db_filepath, bv):
 
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort == "veenweide"), 'slope'] = 3.0
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & ('veen' in hydro_objects.grondsoort.lower()), 'slope'] = 3.0
     hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
