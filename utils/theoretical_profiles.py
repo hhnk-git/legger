@@ -373,7 +373,7 @@ def create_theoretical_profiles(legger_db_filepath, bv):
 
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & ('veen' in hydro_objects.grondsoort.lower()), 'slope'] = 3.0
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort == 'Veen'), 'slope'] = 3.0
     hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
