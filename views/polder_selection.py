@@ -3,7 +3,7 @@ from __future__ import division
 
 import logging
 import os
-
+from sqlalchemy.sql import text
 from qgis.PyQt import QtCore, QtGui, QtWidgets
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtWidgets import QFileDialog, QWidget
