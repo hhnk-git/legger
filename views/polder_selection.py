@@ -69,7 +69,7 @@ class PolderSelectionWidget(QWidget):  # , FORM_CLASS):
         self.msg_upper_row.setInformativeText(
             "Voor de toewijzing van leggerprofielen wordt een aparte 'leggerdatabase' "
             "gemaakt. Deze database is een aparte .sqlite bestand waar data uit "
-            "DAMO als randvoorwaarden "
+            "DAMO en 3Di modelresultaat zijn gecombineerd "
             "voor de leggerprofielen, zoals breedte en talud per hydro-object.\n"
             "Wanneer een nieuwe leggerdatabase gemaakt moet worden, selecteer dan bij "
             "voorkeur de DAMO die ook voor de opbouw van het 3di model zijn "
@@ -265,11 +265,11 @@ class PolderSelectionWidget(QWidget):  # , FORM_CLASS):
         self.groupBox_explanation.setLayout(self.box_explanation)
 
         self.groupBox_leggerdatabase_create = QtWidgets.QGroupBox(self)
-        self.groupBox_leggerdatabase_create.setTitle("GDB bestanden voor aanmaken leggerdatabase")
+        self.groupBox_leggerdatabase_create.setTitle("GDB bestanden voor aanmaken leggertool sqlite")
         self.groupBox_leggerdatabase_create.setLayout(self.box_leggerdatabase_create)
 
         self.groupBox_leggerdatabase_input = QtWidgets.QGroupBox(self)
-        self.groupBox_leggerdatabase_input.setTitle("Leggerdatabase kiezen als deze al bestaat")
+        self.groupBox_leggerdatabase_input.setTitle("Leggertool sqlite kiezen als deze al bestaat")
         self.groupBox_leggerdatabase_input.setLayout(self.box_leggerdatabase_input)
 
         # Add groupbox to row
@@ -289,7 +289,7 @@ class PolderSelectionWidget(QWidget):  # , FORM_CLASS):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(_translate("Dialog", "Selecteer en/of maak de leggerdatabase van de polder", None))
         self.explanation_button.setText(_translate("Dialog", "Klik hier voor meer uitleg", None))
-        self.load_DAMO_dump_button.setText(_translate("Dialog", "Selecteer DAMO gdb", None))
-        self.create_leggerdatabase_button.setText(_translate("Dialog", "Aanmaken database", None))
-        self.load_leggerdatabase_button.setText(_translate("Dialog", "Selecteer leggerdb", None))
+        self.load_DAMO_dump_button.setText(_translate("Dialog", "Selecteer FileGeoDatabase (.gdb) van polder", None))
+        self.create_leggerdatabase_button.setText(_translate("Dialog", "Aanmaken leggertool sqlite", None))
+        self.load_leggerdatabase_button.setText(_translate("Dialog", "Selecteer leggertool sqlite", None))
         self.cancel_button.setText(_translate("Dialog", "Sluiten", None))

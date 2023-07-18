@@ -378,7 +378,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.snap_points_button.setObjectName("Snap points")
         self.snap_points_button.clicked.connect(self.execute_snap_points)
         self.groupBox_snap_points = QtWidgets.QGroupBox(self)
-        self.groupBox_snap_points.setTitle("Stap 1: snap eindpunten")
+        self.groupBox_snap_points.setTitle("Stap 1: snap hydroobjecten")
         self.box_snap_points = QtWidgets.QHBoxLayout()
         self.box_snap_points.addWidget(self.snap_points_button)
         self.groupBox_snap_points.setLayout(self.box_snap_points)  # box toevoegen aan groupbox
@@ -529,10 +529,10 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.step2_explanation_button.setText("Uitleg stap 3")
         self.step2_button.setText("Bereken alle mogelijke leggerprofielen")
         self.step3_button.setText("Bereken de fit van de berekende profielen")
-        self.snap_points_button.setText("Snap eindpunten van lijnen")
+        self.snap_points_button.setText("Snap hydroobjecten")
 
         self.pre_fill_button.setText("Standaard profielen toevoegen en invullen waar mogelijk")
         self.run_all_button.setText("Run alle taken achter elkaar")
-        self.run_post_process_button.setText("Verhang op basis van gekozen legger")
+        self.run_post_process_button.setText("Opstuwing op basis van gekozen legger")
 
         self.cancel_button.setText("Cancel")
