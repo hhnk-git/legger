@@ -28,11 +28,40 @@ def get_gradient_norm(grondsoort):
     Get the gradient norm for the given soil type.
     maximal allowable gradient in waterway in cm/km
     """
-    if 'veen' in grondsoort.lower():
+    if 'Veen' in grondsoort:
         return 2.0
     else:
         return 3.0
 
+def get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth):
+    """
+    Compute the slope according to:
+    Veen
+        - Waterbreedte tot 4 m, talud 1:2
+        - Waterbreedte 4-10 m, talud 1:3
+        - Waterbreedte >10 m, talud 1:4
+    Klei/ Zand
+        - Waterbreedte tot 6 m, talud 1:1,5
+        - Waterbreedte >6 m talud 1:2
+    """
+    
+    if 'Veen' in grondsoort:
+        hydraulic_slope = 2
+        hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
+        if hydraulic_ditch_width >= 4.0:
+            hydraulic_slope = 3
+            hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
+            if hydraulic_ditch_width >= 10.0:
+                hydraulic_slope = 4
+                hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
+    else: # overige grondsoorten
+        hydraulic_slope = 1.5
+        hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
+        if hydraulic_ditch_width >= 6.0:
+            hydraulic_slope = 2
+            hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
+
+    return hydraulic_slope
 
 """
 General Definitions
@@ -229,7 +258,7 @@ def calc_profile_variants_for_hydro_object(
             hydraulic_ditch_bottom_width = ditch_bottom_width
 
             ditch_width = ditch_bottom_width + water_depth * slope * 2.0
-            if 'veen' in grondsoort.lower():
+            if 'Veen' in grondsoort:
                 if ditch_width >= 2:
                     hydraulic_water_depth = water_depth - 0.15
                 else:
@@ -243,6 +272,8 @@ def calc_profile_variants_for_hydro_object(
             if hydraulic_water_depth < minimal_hydraulic_waterdepth:
                 break
 
+            hydraulic_slope = get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth)
+            slope = hydraulic_slope
             hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
 
             gradient_pitlo_griffioen = calc_pitlo_griffioen(

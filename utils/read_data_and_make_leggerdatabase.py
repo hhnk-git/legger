@@ -178,7 +178,7 @@ class CreateLeggerSpatialite(object):
             ST_Length(geometry) as lengte,
             taludvoorkeur as talud_voorkeur,
             min(ws_talud_links, ws_talud_rechts) as steilste_talud,
-            grondsoort as grondsoort,
+            CASE WHEN grondsoort IS NULL THEN 'Onbekend' ELSE grondsoort END as grondsoort,
             hydroobject_id as hydro_id
           FROM imp_hydroobject
         """)
