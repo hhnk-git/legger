@@ -8,7 +8,7 @@
 #  X geometry colom vastzetten (op 'geometry')
 #  - logging van ogr2ogr terugsluizen naar logging
 #  - melding of proces gelukt is en verwijzen naar logging indien mislukt
-
+from sqlalchemy.sql import text
 import datetime
 import logging
 import os
@@ -142,24 +142,24 @@ class CreateLeggerSpatialite(object):
 
         # vullen profielpunten
         session = self.db.get_session()
-        session.execute("""
+        session.execute(text("""
         INSERT INTO profielpunten  (pbp_id, prw_id, pbpident, osmomsch, iws_volgnr, iws_hoogte, afstand, pro_pro_id, geometry)
         SELECT pbp_id, prw_id, pbpident, osmomsch, iws_volgnr, iws_hoogte, iws_afstand, pro_pro_id, CastToXY(ipp.geometry)
         FROM imp_gw_pbp pbp, imp_iws_geo_beschr_profielpunten ipp, imp_gw_prw prw 
         WHERE pbp.pbp_id = ipp.pbp_pbp_id AND pbp.prw_prw_id = prw.prw_id
-        """)
+        """))
 
         # vullen profielen
-        session.execute("""
+        session.execute(text("""
         INSERT INTO profielen  (proident, bron_profiel, pro_id, hydro_id)
         SELECT proident, pro.osmomsch, pro_id, ho.hydroobject_id as hydroobject_id
         FROM imp_gw_pro pro
         LEFT JOIN imp_hydroobject ho ON st_intersects(pro.geometry, ho.geometry)  
         where betrouwbaar = 1
-        """)
+        """))
 
         # vullen kenmerken
-        session.execute("""
+        session.execute(text("""
         INSERT INTO kenmerken(
             id,
             diepte,
@@ -181,9 +181,9 @@ class CreateLeggerSpatialite(object):
             CASE WHEN grondsoort IS NULL THEN 'Onbekend' ELSE grondsoort END as grondsoort,
             hydroobject_id as hydro_id
           FROM imp_hydroobject
-        """)
+        """))
 
-        session.execute("""
+        session.execute(text("""
         INSERT INTO hydroobject  (id, code, categorieoppwaterlichaam, streefpeil, zomerpeil, debiet_inlaat, debiet_fme, richting_fme, geometry)
         SELECT 
             hydroobject_id as id,
@@ -196,21 +196,21 @@ class CreateLeggerSpatialite(object):
             richting,
             geometry
         FROM imp_hydroobject
-        """)
+        """))
 
-        session.execute("""
+        session.execute(text("""
                  SELECT CreateSpatialIndex('hydroobject', 'geometry');
-                 """)
+                 """))
 
         # vullen waterdeel =
-        session.execute("""
+        session.execute(text("""
         INSERT INTO waterdeel  (id, shape_length, shape_area, geometry)
         SELECT ogc_fid as id, shape_length, shape_area, geometry
         FROM imp_waterdeel
-        """)
+        """))
 
         # duikersifonhevel
-        session.execute("""
+        session.execute(text("""
          INSERT INTO duikersifonhevel(
              id, 
              code, 
@@ -236,27 +236,27 @@ class CreateLeggerSpatialite(object):
              "0",
              geometry
          FROM imp_duikersifonhevel
-         """)
+         """))
 
         # debiet 3di
-        session.execute("""
+        session.execute(text("""
          CREATE TABLE debiet_3di AS 
          SELECT
              fid as id,
              CASE WHEN richting > 0 THEN q_abs ELSE -1 * q_abs END as debiet,
              geometry
          FROM imp_Debieten_3Di_HR;
-         """)
+         """))
 
-        session.execute("""
+        session.execute(text("""
                  SELECT RecoverGeometryColumn( 'debiet_3di' , 'geometry' , 28992 , 'MULTILINESTRING' );
-                 """)
+                 """))
 
-        session.execute("""
+        session.execute(text("""
                  SELECT CreateSpatialIndex('debiet_3di', 'geometry');
-                 """)
+                 """))
 
-        session.execute("""
+        session.execute(text("""
 WITH
     cnt as (SELECT 1 x union select x+1 from cnt where x<24)
 	, pnt as (
@@ -296,14 +296,14 @@ WITH
 				WHERE m.hydro_id = id
 					),
         score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
-         """)
+         """))
 
-        session.execute("""
+        session.execute(text("""
     UPDATE hydroobject
     SET debiet = debiet_3di
-                 """)
+                 """))
 
-        session.execute("""
+        session.execute(text("""
             WITH 
                 max_diepte as (Select pr.hydro_id as hydro_id, min(pp.iws_hoogte) as bodemhoogte, ho.streefpeil - min(pp.iws_hoogte)  as diepte, 'meting' as bron
                 from profielpunten pp, profielen pr, hydroobject ho
@@ -313,43 +313,43 @@ WITH
             UPDATE kenmerken
             SET (bodemhoogte, diepte, bron_diepte) = (SELECT bodemhoogte, diepte, bron FROM max_diepte WHERE kenmerken.hydro_id = max_diepte.hydro_id)
             WHERE kenmerken.hydro_id in (SELECT hydro_id FROM max_diepte)    
-            """)
+            """))
 
         session.commit()
 
     def delete_imported_tables(self):
         session = self.db.get_session()
         for table in self.tables:
-            session.execute("DROP TABLE IF EXISTS imp_{0} ;".format(table.lower()))
-            session.execute("DROP TABLE IF EXISTS idx_imp_{0}_geometry;".format(table.lower()))
-            session.execute("DROP TABLE IF EXISTS idx_imp_{0}_geometry_node;".format(table.lower()))
-            session.execute("DROP TABLE IF EXISTS idx_imp_{0}_geometry_parent;".format(table.lower()))
-            session.execute("DROP TABLE IF EXISTS idx_imp_{0}_geometry_rowid;".format(table.lower()))
-            session.execute("DELETE FROM geometry_columns WHERE f_table_name = 'imp_{0}';".format(table.lower()))
+            session.execute(text("DROP TABLE IF EXISTS imp_{0} ;".format(table.lower())))
+            session.execute(text("DROP TABLE IF EXISTS idx_imp_{0}_geometry;".format(table.lower())))
+            session.execute(text("DROP TABLE IF EXISTS idx_imp_{0}_geometry_node;".format(table.lower())))
+            session.execute(text("DROP TABLE IF EXISTS idx_imp_{0}_geometry_parent;".format(table.lower())))
+            session.execute(text("DROP TABLE IF EXISTS idx_imp_{0}_geometry_rowid;".format(table.lower())))
+            session.execute(text("DELETE FROM geometry_columns WHERE f_table_name = 'imp_{0}';".format(table.lower())))
 
         session.commit()
         # make space available by reducing filesize
-        session.execute("VACUUM")
+        session.execute(text("VACUUM"))
         session.commit()
 
     def add_default_settings(self):
         session = self.db.get_session()
 
-        session.execute(
+        session.execute(text(
             """
                     INSERT INTO begroeiingsvariant(id, naam, is_default, friction_manning, friction_begroeiing, begroeiingsdeel) 
                     VALUES 
                         (3, 'vol', 1, 34, 65, 0.9),
                         (2, 'half', 0, 34, 30, 0.5),
                         (1, 'kwart', 0, 34, 30, 0.25)
-                    """)
+                    """))
 
-        session.execute(
+        session.execute(text(
             "INSERT INTO categorie(categorie, naam, variant_diepte_min, variant_diepte_max, default_talud) VALUES "
             "(1, 'primair', 0.2, 3, 1.5),"
             "(2, 'secundair', 0.15, 2.5, 1.5),"
             "(3, 'tertaire', 0.15, 1, 1.5),"
-            "(4, 'overig', 0.15, 1, 1.5)")
+            "(4, 'overig', 0.15, 1, 1.5)"))
         session.commit()
 
 
