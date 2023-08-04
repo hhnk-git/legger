@@ -110,7 +110,7 @@ class LayerManager():
                                 'begroeiingsvariant', 'geometry', None, True),
             ]),
             ('herverdelingcheck', [
-                LayerDefinition('debiet 3di', 'hydroobject', 'debiet_3di', 'debiet', 'geometry', 'min_max_line', False),
+                LayerDefinition('debiet 3di', 'hydroobject', 'debiet_3di', 'debiet_3di', 'geometry', 'min_max_line', False),
                 LayerDefinition('punten balans - herverdeling tov origineel', 'graph_nodes', '', 'punt_wb_diff',
                                 'geometry', None, True),
                 LayerDefinition('punten balans - gekop. 3di resultaten', 'graph_nodes', '', 'punt_wb_edi',
