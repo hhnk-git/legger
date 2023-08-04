@@ -6,6 +6,7 @@ from legger.sql_models.legger import Varianten, get_or_create
 from pandas import DataFrame
 import sqlite3
 from legger.sql_models.legger_database import load_spatialite
+from math import ceil
 
 log = logging.getLogger('legger.' + __name__)
 
@@ -17,9 +18,9 @@ Km = 25  # Manning coefficient in m**(1/3/s)
 Kb = 23  # Bos and Bijkerk coefficient in 1/s
 
 ini_waterdepth = 0.20  # Initial water depth (m).
-default_minimal_waterdepth = 0.15
-default_minimal_hydraulic_waterdepth = 0.10
-min_ditch_bottom_width = 0.5  # (m) Ditch bottom width can not be smaller dan 0,5m.
+default_minimal_waterdepth = 0.3
+default_minimal_hydraulic_waterdepth = 0.1
+min_ditch_bottom_width = 0.2  # (m) Ditch bottom width can not be smaller dan 0,2m.
 default_minimal_bottom_width = min_ditch_bottom_width
 
 
@@ -28,15 +29,15 @@ def get_gradient_norm(grondsoort):
     Get the gradient norm for the given soil type.
     maximal allowable gradient in waterway in cm/km
     """
-    if 'Veen' in grondsoort:
+    if 'veen' in grondsoort.lower():
         return 2.0
     else:
         return 3.0
 
-def get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth):
+def get_slope_width(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth):
     """
-    Compute the slope according to:
-    Veen
+    Compute the slope and width according to:
+    Veenhydraulic_ditch_width
         - Waterbreedte tot 4 m, talud 1:2
         - Waterbreedte 4-10 m, talud 1:3
         - Waterbreedte >10 m, talud 1:4
@@ -45,7 +46,7 @@ def get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth):
         - Waterbreedte >6 m talud 1:2
     """
     
-    if 'Veen' in grondsoort:
+    if 'veen' in grondsoort.lower():
         hydraulic_slope = 2
         hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
         if hydraulic_ditch_width >= 4.0:
@@ -61,7 +62,9 @@ def get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth):
             hydraulic_slope = 2
             hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
 
-    return hydraulic_slope
+    hydraulic_ditch_width = round(hydraulic_ditch_width,2
+                                  )
+    return hydraulic_slope, hydraulic_ditch_width
 
 """
 General Definitions
@@ -195,7 +198,7 @@ def calc_profile_variants_for_hydro_object(
     if friction_manning is None or friction_begroeiing is None:
         raise ValueError('friction manning or begroeiing are both None')
 
-    slope = hydro_object.slope
+    slope = hydro_object.slope # gebruikt als eerste inschatting voor bepalen profiel, daarna check op welk talud werkelijk
     max_ditch_width = hydro_object.max_ditch_width
     normative_flow = hydro_object.normative_flow
     zpeil_diff = hydro_object.zpeil_diff
@@ -226,56 +229,74 @@ def calc_profile_variants_for_hydro_object(
                                         'gradient_norm',])
 
     # minus 0.05, because in loop this is added
-    water_depth = store_from_depth - 0.05
+    hydraulic_water_depth = store_from_depth - 0.05
 
     go_on = True
     afvoer_leidend = 1
+
+    # loop over depths
     while go_on:
         # water_depth for this while loop
-        if water_depth <= 1:
-            water_depth = water_depth + 0.05
-        elif water_depth <= 3:
-            water_depth = water_depth + 0.10
+        if hydraulic_water_depth <= 1:
+            hydraulic_water_depth = hydraulic_water_depth + 0.05
+        elif hydraulic_water_depth <= 2:
+            hydraulic_water_depth = hydraulic_water_depth + 0.10
         else:
-            water_depth = water_depth + 0.20
+            hydraulic_water_depth = hydraulic_water_depth + 0.20
 
-        hydraulic_water_depth = 0
+        water_depth = 0
 
         # initial values for finding profile which fits
         gradient_pitlo_griffioen = 1000
         gradient_pitlo_griffioen_inlaat = 0
         # minus 0.10, because in loop 0.10 is added
-        ditch_bottom_width = minimal_bottom_width - 0.10
-        hydraulic_ditch_bottom_width = ditch_bottom_width
+        hydraulic_ditch_bottom_width = minimal_bottom_width - 0.10
+        ditch_bottom_width = None
         ditch_width = None
         hydraulic_ditch_width = None
         afvoer_leidend = 1
 
+        # caculate width for selected depth
         # make sure this loop runs at least one time to calculate values
         while gradient_pitlo_griffioen > gradient_norm or gradient_pitlo_griffioen_inlaat > gradient_norm_inlaat:
 
-            ditch_bottom_width = ditch_bottom_width + 0.10
-            hydraulic_ditch_bottom_width = ditch_bottom_width
+            ### Eerst hydraulisch profiel opbouwen, waterdiepte is bekend uit bovenstaande while
+            # Bodembreedte in stappen per 10 cm toe laten nemen
+            hydraulic_ditch_bottom_width = hydraulic_ditch_bottom_width + 0.10
 
-            ditch_width = ditch_bottom_width + water_depth * slope * 2.0
-            if 'Veen' in grondsoort:
-                if ditch_width >= 2:
-                    hydraulic_water_depth = water_depth - 0.15
+            # Bereken slope en waterbreedte
+            hydraulic_slope, hydraulic_ditch_width = get_slope_width(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth)
+            
+            ### Leggerprofiel opbouwen
+            # Waterdiepte leggerprofiel
+            if 'veen' in grondsoort.lower():
+                if hydraulic_ditch_width >= 2:
+                    water_depth = hydraulic_water_depth + 0.15
                 else:
-                    hydraulic_water_depth = water_depth - 0.10
+                    water_depth = hydraulic_water_depth + 0.10
             else:
-                if ditch_width >= 6:
-                    hydraulic_water_depth = water_depth - 0.20
+                if hydraulic_ditch_width >= 6:
+                    water_depth = hydraulic_water_depth + 0.20
                 else:
-                    hydraulic_water_depth = water_depth - 0.15
+                    water_depth = hydraulic_water_depth + 0.15
 
-            if hydraulic_water_depth < minimal_hydraulic_waterdepth:
-                break
+            # Talud leggerprofiel gelijk aan hydraulische
+            slope = hydraulic_slope            
+            
+            # Bodembreedte wordt smaller met grotere diepte en gelijk talud, maar niet smaller dan 20 cm
+            ditch_bottom_width = hydraulic_ditch_bottom_width - (2 * slope * (water_depth - hydraulic_water_depth))
+            
+            # afronden op 5 cm
+            ditch_bottom_width =  ceil(ditch_bottom_width / 0.05) * 0.05
+            
+            # als bodembreedte te klein is sla over, door naar volgende binnen while loop, volgende breedte-stap
+            if ditch_bottom_width < 0.2:
+                continue
 
-            hydraulic_slope = get_slope(grondsoort, hydraulic_ditch_bottom_width, hydraulic_water_depth)
-            slope = hydraulic_slope
-            hydraulic_ditch_width = hydraulic_ditch_bottom_width + hydraulic_water_depth * hydraulic_slope * 2.0
-
+            # Waterbreedte leggerprofiel
+            ditch_width = round(ditch_bottom_width + water_depth * slope * 2.0,2)
+            
+            ### Begin berekenen verhang
             gradient_pitlo_griffioen = calc_pitlo_griffioen(
                 abs(normative_flow), hydraulic_ditch_bottom_width, hydraulic_water_depth, hydraulic_slope,
                 friction_manning, friction_begroeiing, begroeiingsdeel)
@@ -284,7 +305,7 @@ def calc_profile_variants_for_hydro_object(
             if gradient_pitlo_griffioen <= gradient_norm and debiet_inlaat is not None and debiet_inlaat != 0.0:
                 # check inlaat
                 gradient_pitlo_griffioen_inlaat = calc_pitlo_griffioen(
-                    abs(debiet_inlaat), hydraulic_ditch_bottom_width, hydraulic_water_depth + zpeil_diff,
+                    abs(debiet_inlaat), hydraulic_ditch_bottom_width, hydraulic_water_depth + zpeil_diff, 
                     hydraulic_slope,
                     friction_manning, friction_begroeiing, begroeiingsdeel)
             else:
@@ -311,7 +332,8 @@ def calc_profile_variants_for_hydro_object(
 
         if hydraulic_water_depth < minimal_hydraulic_waterdepth:
             continue
-        # store
+        
+        # store profielvarianten
         object_waterdepth_id = "{0}_{1:.2f}-{2:.1f}".format(
             object_id, water_depth, begroeiingsdeel)
 
@@ -404,7 +426,7 @@ def create_theoretical_profiles(legger_db_filepath, bv):
 
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort == 'Veen'), 'slope'] = 3.0
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & ('veen' in hydro_objects.grondsoort.lower()), 'slope'] = 3.0 # hydro_objects.grondsoort == 'Veen'
     hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
