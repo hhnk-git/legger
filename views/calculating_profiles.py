@@ -86,12 +86,12 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # fill timestep combobox
         choices = [self.last_timestep_text] + ['%.0f' % t for t in self.timestamps]
-        self.timestep_combo_box.insertItems(0, choices)
-        self.timestep_combo_box.setCurrentIndex(0)
+        #self.timestep_combo_box.insertItems(0, choices)
+        #self.timestep_combo_box.setCurrentIndex(0)
 
         # set time combobox listeners
-        self.timestep_combo_box.currentIndexChanged.connect(
-            self.timestep_selection_change)
+        # self.timestep_combo_box.currentIndexChanged.connect(
+        #     self.timestep_selection_change)
 
         # surge combobox
         self.last_surge_text = "kies opstuwingsnorm"
@@ -114,9 +114,9 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         event (QtEvent): event triggering close
         returns: None
         """
-        # set listeners
-        self.timestep_combo_box.currentIndexChanged.disconnect(
-            self.timestep_selection_change)
+        # # set listeners
+        # self.timestep_combo_box.currentIndexChanged.disconnect(
+        #     self.timestep_selection_change)
 
         self.closingDialog.emit()
         self.close()
@@ -453,37 +453,37 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         
         # old 3di
         # timestep selection for UPPER ROW groupbox:
-        self.timestep_combo_box = QComboBox(self)
+        # self.timestep_combo_box = QComboBox(self)
 
-        self.step3di_button = QtWidgets.QPushButton(self)
-        self.step3di_button.setObjectName("step3di_button")
-        self.step3di_button.clicked.connect(self.execute_step_old_3di)
+        # self.step3di_button = QtWidgets.QPushButton(self)
+        # self.step3di_button.setObjectName("step3di_button")
+        # self.step3di_button.clicked.connect(self.execute_step_old_3di)
 
-        self.step3diold_explanation_button = QtWidgets.QPushButton(self)
-        self.step3diold_explanation_button.setObjectName("uitleg_stap1")
-        self.step3diold_explanation_button.clicked.connect(self.explain_step_old_3di)
+        # self.step3diold_explanation_button = QtWidgets.QPushButton(self)
+        # self.step3diold_explanation_button.setObjectName("uitleg_stap1")
+        # self.step3diold_explanation_button.clicked.connect(self.explain_step_old_3di)
 
-        self.groupBox_step3diold = QtWidgets.QGroupBox(self)
-        self.groupBox_step3diold.setTitle("oude functies: lees 3di resultaten")
-        self.box_step3diold = QtWidgets.QVBoxLayout()
+        # self.groupBox_step3diold = QtWidgets.QGroupBox(self)
+        # self.groupBox_step3diold.setTitle("oude functies: lees 3di resultaten")
+        # self.box_step3diold = QtWidgets.QVBoxLayout()
 
-        self.model_filename = QtWidgets.QLineEdit(self)
-        self.model_filename.setText(self.path_model_db)
-        self.model_filename.setObjectName("model filename")
-        self.result_filename = QtWidgets.QLineEdit(self)
-        self.result_filename.setText(self.path_result_nc)
-        self.result_filename.setObjectName("result filename")
-        self.connection_filename = QtWidgets.QLineEdit(self)
-        self.connection_filename.setText(self.path_result_db)
-        self.connection_filename.setObjectName("connection filename")
-        self.box_step3diold.addWidget(self.model_filename)
-        self.box_step3diold.addWidget(self.result_filename)
-        self.box_step3diold.addWidget(self.connection_filename)
+        # self.model_filename = QtWidgets.QLineEdit(self)
+        # self.model_filename.setText(self.path_model_db)
+        # self.model_filename.setObjectName("model filename")
+        # self.result_filename = QtWidgets.QLineEdit(self)
+        # self.result_filename.setText(self.path_result_nc)
+        # self.result_filename.setObjectName("result filename")
+        # self.connection_filename = QtWidgets.QLineEdit(self)
+        # self.connection_filename.setText(self.path_result_db)
+        # self.connection_filename.setObjectName("connection filename")
+        # self.box_step3diold.addWidget(self.model_filename)
+        # self.box_step3diold.addWidget(self.result_filename)
+        # self.box_step3diold.addWidget(self.connection_filename)
 
-        self.box_step3diold.addWidget(self.timestep_combo_box)
-        self.box_step3diold.addWidget(self.step3di_button)
-        self.box_step3diold.addWidget(self.step3diold_explanation_button)
-        self.groupBox_step3diold.setLayout(self.box_step3diold)  # box toevoegen aan groupbox
+        #self.box_step3diold.addWidget(self.timestep_combo_box)
+        #self.box_step3diold.addWidget(self.step3di_button)
+        #self.box_step3diold.addWidget(self.step3diold_explanation_button)
+        #self.groupBox_step3diold.setLayout(self.box_step3diold)  # box toevoegen aan groupbox
 
         # Assembling feedback row
         self.feedbacktext = QtWidgets.QTextEdit(self)
@@ -512,7 +512,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.verticalLayout.addLayout(self.bottom_row)
         self.verticalLayout.addWidget(self.groupBox_run_all)
         self.verticalLayout.addWidget(self.groupBox_post_process)
-        self.verticalLayout.addWidget(self.groupBox_step3diold)
+        #self.verticalLayout.addWidget(self.groupBox_step3diold)
         self.verticalLayout.addLayout(self.feedback_row)
         self.verticalLayout.addLayout(self.exit_row)
 
@@ -523,8 +523,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         Dialog.setWindowTitle("Bereken de profielvarianten van de polder")
         self.save_button.setText("Opslaan en sluiten")
-        self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
-        self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
+        #self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
+        #self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
         self.step_redirect_flow_button.setText("Kies eerst eindpunten, dan herverdeel debieten")
         self.step2_explanation_button.setText("Uitleg stap 3")
         self.step2_button.setText("Bereken alle mogelijke leggerprofielen")
