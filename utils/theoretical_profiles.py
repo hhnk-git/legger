@@ -294,7 +294,7 @@ def calc_profile_variants_for_hydro_object(
                 continue
 
             # Waterbreedte leggerprofiel
-            ditch_width = round(ditch_bottom_width + water_depth * slope * 2.0,2)
+            ditch_width = round(ditch_bottom_width + water_depth * slope * 2.0, 2)
             
             ### Begin berekenen verhang
             gradient_pitlo_griffioen = calc_pitlo_griffioen(
@@ -426,7 +426,7 @@ def create_theoretical_profiles(legger_db_filepath, bv):
 
     for cat, slope in default_slope.items():
         hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & ('veen' in hydro_objects.grondsoort.lower()), 'slope'] = 3.0 # hydro_objects.grondsoort == 'Veen'
+    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort.str.contains('veen', case=False)), 'slope'] = 3.0 # hydro_objects.grondsoort == 'Veen'
     hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
