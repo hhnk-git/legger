@@ -198,7 +198,6 @@ def calc_profile_variants_for_hydro_object(
     if friction_manning is None or friction_begroeiing is None:
         raise ValueError('friction manning or begroeiing are both None')
 
-    slope = hydro_object.slope # gebruikt als eerste inschatting voor bepalen profiel, daarna check op welk talud werkelijk
     max_ditch_width = hydro_object.max_ditch_width
     normative_flow = hydro_object.normative_flow
     zpeil_diff = hydro_object.zpeil_diff
@@ -206,8 +205,6 @@ def calc_profile_variants_for_hydro_object(
     object_id = hydro_object.object_id
     length = hydro_object.length
     grondsoort = hydro_object.grondsoort
-
-    hydraulic_slope = slope
 
     gradient_norm = get_gradient_norm(grondsoort)
     gradient_norm_inlaat = gradient_norm
@@ -362,7 +359,7 @@ def calc_profile_variants_for_hydro_object(
         variants_table = variants_table.append(
             pd.DataFrame([obj], columns=variants_table.columns))
 
-        if water_depth >= store_to_depth and gradient_pitlo_griffioen < gradient_norm:
+        if water_depth >= store_to_depth and (gradient_pitlo_griffioen < gradient_norm or begroeiingsdeel != 1):
             go_on = False
 
     variants_table.reset_index()
@@ -419,15 +416,15 @@ def create_theoretical_profiles(legger_db_filepath, bv):
             max_depth_settings[cat['categorieoppwaterlichaam']] = min(
                 cat_max_depth, last_category, max_depth_settings[cat['categorieoppwaterlichaam']])
         else:
-            max_depth_settings[cat['categorieoppwaterlichaam']] = min(cat['max_diepte'] * cat_max_depth)
+            max_depth_settings[cat['categorieoppwaterlichaam']] = min(cat['max_diepte'], cat_max_depth)
 
-    default_slope = {cat['categorie']: cat['default_talud'] for cat in all_categories
-                     if cat['default_talud'] is not None}
-
-    for cat, slope in default_slope.items():
-        hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort.str.contains('veen', case=False)), 'slope'] = 3.0 # hydro_objects.grondsoort == 'Veen'
-    hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
+    # default_slope = {cat['categorie']: cat['default_talud'] for cat in all_categories
+    #                  if cat['default_talud'] is not None}
+    #
+    # for cat, slope in default_slope.items():
+    #     hydro_objects.loc[(pd.isnull(hydro_objects.slope) & hydro_objects.category == cat), 'slope'] = slope
+    # hydro_objects.loc[(pd.isnull(hydro_objects.slope)) & (hydro_objects.grondsoort.str.contains('veen', case=False)), 'slope'] = 3.0 # hydro_objects.grondsoort == 'Veen'
+    # hydro_objects.loc[(pd.isnull(hydro_objects.slope)), 'slope'] = 1.5
 
     hydro_objects.DIEPTE = pd.to_numeric(hydro_objects.DIEPTE, downcast='float', errors='coerce')
     hydro_objects.zpeil_diff = pd.to_numeric(hydro_objects.zpeil_diff, downcast='float', errors='coerce')
