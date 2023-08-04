@@ -360,7 +360,7 @@ class Network(object):
                 geforceerd_omgedraaid=?,
                 routing_gewicht=?,
                 debiet_aangepast=?,
-                debiet=?
+                debiet=COALESCE(debiet_opgelegd, ?)
             WHERE 
                 id=?      
         """, [(l.outflow_node().id in start_nodes,

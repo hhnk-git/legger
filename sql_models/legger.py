@@ -97,6 +97,7 @@ class HydroObject(Base):
     richting_fme = Column(Integer)
     debiet_inlaat = Column(Float)
     debiet_aangepast = Column(Float)
+    debiet_opgelegd = Column(Float)
     debiet = Column(Float)
     channel_id = Column(Integer)  # link to 3di id
     flowline_id = Column(Integer)  # link to 3di id
