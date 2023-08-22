@@ -107,3 +107,4 @@ tests/data/tdimodel/subgrid_map_original.nc
 tests/data/
 remote_debugger_settings.py
 layer_styles/generated/
+.DS_Store

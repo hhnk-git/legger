@@ -2,26 +2,24 @@
 #  - 'opstuwingsnorm' selection?
 #  - correct or selectable friction values
 import datetime
-# -*- coding: utf-8 -*-
-
 import logging
 import time
-
 from legger.sql_models.legger import BegroeiingsVariant, HydroObject
 from legger.sql_models.legger_database import LeggerDatabase
 from legger.sql_models.legger_database import load_spatialite
+from legger.utils.automatic_fill_legger import automatic_fill_legger
 from legger.utils.calc_gradient import calc_gradient
 from legger.utils.profile_match_a import doe_profinprof, maaktabellen
 from legger.utils.read_tdi_results import (get_timestamps, read_tdi_culvert_results, read_tdi_results,
                                            write_tdi_culvert_results_to_db, write_tdi_results_to_db)
 from legger.utils.redirect_flows_to_main_branches import redirect_flows
 from legger.utils.snap_points import snap_points
-from legger.utils.theoretical_profiles import create_theoretical_profiles, write_theoretical_profile_results_to_db
-from legger.utils.automatic_fill_legger import automatic_fill_legger
+from legger.utils.theoretical_profiles import create_variants
 from qgis.PyQt import QtCore, QtWidgets
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QComboBox, QWidget
 
+# -*- coding: utf-8 -*-
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +58,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         try:
 
-            self.path_result_db = self.ts_datasource.rows[0].datasource_layer_helper.sqlite_gridadmin_filepath.replace('\\', '/')
+            self.path_result_db = self.ts_datasource.rows[0].datasource_layer_helper.sqlite_gridadmin_filepath.replace(
+                '\\', '/')
 
         except:
             self.path_result_db = errormessage
@@ -86,8 +85,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # fill timestep combobox
         choices = [self.last_timestep_text] + ['%.0f' % t for t in self.timestamps]
-        #self.timestep_combo_box.insertItems(0, choices)
-        #self.timestep_combo_box.setCurrentIndex(0)
+        # self.timestep_combo_box.insertItems(0, choices)
+        # self.timestep_combo_box.setCurrentIndex(0)
 
         # set time combobox listeners
         # self.timestep_combo_box.currentIndexChanged.connect(
@@ -95,7 +94,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         # surge combobox
         self.last_surge_text = "kies opstuwingsnorm"
-
 
     def timestep_selection_change(self, nr):
         """Proces new selected timestep in combobox
@@ -269,38 +267,19 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         )
         db.create_and_check_fields()
         # do one query, don't know what the reason was for this...
-        session = db.get_session()
-
-        # instance = session.query(BegroeiingsVariant).filter_by(naam='basis').first()
-
-        # session.query('Select * FROM varianten')
 
         self.feedbackmessage = ""
-        for bv in session.query(BegroeiingsVariant).all():
-            profiles = None
 
-            try:
-                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Start profielen berekening voor {bv.naam}."
-                profiles = create_theoretical_profiles(self.polder_datasource, bv)
-                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Profielen zijn berekend."
-            except Exception as e:
-                # raise e
-                log.error(e)
-                self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen konden niet worden berekend. melding: {e}"
-            finally:
-                self.feedbacktext.setText(self.feedbackmessage)
-
-            if profiles is not None:
-                try:
-                    write_theoretical_profile_results_to_db(session, profiles, bv)
-                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Profielen opgeslagen in legger db."
-
-                except Exception as e:
-                    log.error(e)
-                    self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen niet opgeslagen in legger database. melding: {e}"
-                    # raise e
-                finally:
-                    self.feedbacktext.setText(self.feedbackmessage)
+        try:
+            self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Start profielen berekening."
+            create_variants(self.polder_datasource)
+            self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Profielen zijn berekend."
+        except Exception as e:
+            # raise e
+            log.exception(e)
+            self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen konden niet worden berekend. melding: {e}"
+        finally:
+            self.feedbacktext.setText(self.feedbackmessage)
 
     def execute_step3(self):
 
@@ -442,7 +421,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.box_run_all.addWidget(self.run_all_button)
         self.groupBox_run_all.setLayout(self.box_run_all)  # box toevoegen aan groupbox
 
-                # Assembling run all
+        # Assembling run all
         self.run_post_process_button = QtWidgets.QPushButton(self)
         self.run_post_process_button.clicked.connect(self.post_process)
         self.groupBox_post_process = QtWidgets.QGroupBox(self)
@@ -450,7 +429,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.box_run_post_process = QtWidgets.QHBoxLayout()
         self.box_run_post_process.addWidget(self.run_post_process_button)
         self.groupBox_post_process.setLayout(self.box_run_post_process)  # box toevoegen aan groupbox
-        
+
         # old 3di
         # timestep selection for UPPER ROW groupbox:
         # self.timestep_combo_box = QComboBox(self)
@@ -480,10 +459,10 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         # self.box_step3diold.addWidget(self.result_filename)
         # self.box_step3diold.addWidget(self.connection_filename)
 
-        #self.box_step3diold.addWidget(self.timestep_combo_box)
-        #self.box_step3diold.addWidget(self.step3di_button)
-        #self.box_step3diold.addWidget(self.step3diold_explanation_button)
-        #self.groupBox_step3diold.setLayout(self.box_step3diold)  # box toevoegen aan groupbox
+        # self.box_step3diold.addWidget(self.timestep_combo_box)
+        # self.box_step3diold.addWidget(self.step3di_button)
+        # self.box_step3diold.addWidget(self.step3diold_explanation_button)
+        # self.groupBox_step3diold.setLayout(self.box_step3diold)  # box toevoegen aan groupbox
 
         # Assembling feedback row
         self.feedbacktext = QtWidgets.QTextEdit(self)
@@ -512,7 +491,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.verticalLayout.addLayout(self.bottom_row)
         self.verticalLayout.addWidget(self.groupBox_run_all)
         self.verticalLayout.addWidget(self.groupBox_post_process)
-        #self.verticalLayout.addWidget(self.groupBox_step3diold)
+        # self.verticalLayout.addWidget(self.groupBox_step3diold)
         self.verticalLayout.addLayout(self.feedback_row)
         self.verticalLayout.addLayout(self.exit_row)
 
@@ -523,8 +502,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         Dialog.setWindowTitle("Bereken de profielvarianten van de polder")
         self.save_button.setText("Opslaan en sluiten")
-        #self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
-        #self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
+        # self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
+        # self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
         self.step_redirect_flow_button.setText("Kies eerst eindpunten, dan herverdeel debieten")
         self.step2_explanation_button.setText("Uitleg stap 3")
         self.step2_button.setText("Bereken alle mogelijke leggerprofielen")

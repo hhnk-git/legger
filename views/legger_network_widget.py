@@ -1,9 +1,8 @@
 import datetime
 import logging
-from collections import OrderedDict
-
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QSplitter
+from collections import OrderedDict
 from legger.qt_models.area_tree import AreaTreeItem, AreaTreeModel, area_class
 from legger.qt_models.legger_tree import LeggerTreeItem, LeggerTreeModel
 from legger.qt_models.profile import ProfileModel
@@ -439,6 +438,7 @@ class LeggerWidget(QDockWidget):
                     - 'maximum' --> not implemented yet
         :return:
         """
+
         output_hydrovakken = [node]
         if initial:
             variant_id = node.hydrovak.get('selected_variant_id')
@@ -466,9 +466,14 @@ class LeggerWidget(QDockWidget):
                 #  "type(begroeiingsvariant) != str" is to filter out setting 'all'
                 if begroeiings_strategy == 'all_upstream' and begroeiingsvariant is not None and type(
                         begroeiingsvariant) != str:
+                    if type(begroeiingsvariant) == int:
+                        begroeiingsvariant_int = begroeiingsvariant
+                    else:
+                        begroeiingsvariant_int = begroeiingsvariant.id
+
                     profile_variant = self.session.query(Varianten).filter(
                         Varianten.hydro_id == node.hydrovak.get('hydro_id'),
-                        Varianten.begroeiingsvariant_id == begroeiingsvariant, 
+                        Varianten.begroeiingsvariant_id == begroeiingsvariant_int,
                         Varianten.diepte < depth + precision,
                         Varianten.diepte > depth - precision
                     )

@@ -195,7 +195,7 @@ class CreateLeggerSpatialite(object):
             debiet_afvoer_prof,
             richting,
             geometry,
-            debiet_opgelegd                 
+            NULL             
         FROM imp_hydroobject
         """))
 
