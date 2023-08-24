@@ -65,7 +65,11 @@ def calc_pitlo_griffioen(flow, ditch_bottom_width, water_depth, slope, friction_
     B = A_2 * friction_begroeiing
     C = friction_manning * A_1 * (R ** 0.66666666666667)
 
-    gradient = 100000 * (2 * B * flow + C ** 2 - C * sqrt(4 * B * flow + C ** 2)) / (2 * B ** 2)
+    try:
+        gradient = 100000 * (2 * B * flow + C ** 2 - C * sqrt(4 * B * flow + C ** 2)) / (2 * B ** 2)
+    except TypeError:
+        a = 1
+
     return gradient
 
 
@@ -453,35 +457,11 @@ def create_variants(legger_db_filepath):
                             bv['begroeiingsdeel']
                         )
 
+                        gradient_pitlo_griffioen_inlaat = None
                         if (gradient_pitlo_griffioen <= hydro_object.gradient_norm and
                                 hydro_object.debiet_inlaat is not None and hydro_object.debiet_inlaat != 0.0):
                             # check inlaat
-                            gradient_pitlo_griffioen_inlaat = calc_pitlo_griffioen(
-                                abs(hydro_object.debiet_inlaat),
-                                profile_size.get('hydraulic_bottom_width'),
-                                hydraulic_depth + hydro_object.zpeil_diff,
-                                profile_size.get('slope'),
-                                bv['friction_manning'],
-                                bv['friction_begroeiing'],
-                                bv['begroeiingsdeel']
-                            )
-                        else:
-                            # skip calculation in loop, if normal gradient is already too high
-                            gradient_pitlo_griffioen_inlaat = 0
-
-                        # stop when gradient is ok or maximum width is reached (except for the first variant with
-                        # the lowest friction)
-                        if ((gradient_pitlo_griffioen <= hydro_object.gradient_norm and
-                             gradient_pitlo_griffioen_inlaat <= hydro_object.gradient_norm_inlaat)
-                                or (profile_size['water_width'] >= maximum_profile.get('water_width'))):
-                            # calc some final values
-
-                            if hydro_object.debiet_inlaat is None:
-                                gradient_pitlo_griffioen_inlaat = None
-                            elif hydro_object.debiet_inlaat == 0.0:
-                                gradient_pitlo_griffioen_inlaat = 0.0
-                            else:
-                                # check inlaat
+                            if hydraulic_depth + hydro_object.zpeil_diff >= Decimal(0.05):
                                 gradient_pitlo_griffioen_inlaat = calc_pitlo_griffioen(
                                     abs(hydro_object.debiet_inlaat),
                                     profile_size.get('hydraulic_bottom_width'),
@@ -491,6 +471,35 @@ def create_variants(legger_db_filepath):
                                     bv['friction_begroeiing'],
                                     bv['begroeiingsdeel']
                                 )
+                            else:
+                                gradient_pitlo_griffioen_inlaat = 999
+
+                        # stop when gradient is ok or maximum width is reached (except for the first variant with
+                        # the lowest friction)
+                        if ((gradient_pitlo_griffioen <= hydro_object.gradient_norm and
+                             (
+                                     gradient_pitlo_griffioen_inlaat is None or gradient_pitlo_griffioen_inlaat <= hydro_object.gradient_norm_inlaat))
+                                or (profile_size['water_width'] >= maximum_profile.get('water_width'))):
+                            # calc some final values
+
+                            if hydro_object.debiet_inlaat is None:
+                                gradient_pitlo_griffioen_inlaat = None
+                            elif hydro_object.debiet_inlaat == 0.0:
+                                gradient_pitlo_griffioen_inlaat = 0.0
+                            else:
+                                # check inlaat
+                                if hydraulic_depth + hydro_object.zpeil_diff >= Decimal(0.05):
+                                    gradient_pitlo_griffioen_inlaat = calc_pitlo_griffioen(
+                                        abs(hydro_object.debiet_inlaat),
+                                        profile_size.get('hydraulic_bottom_width'),
+                                        hydraulic_depth + hydro_object.zpeil_diff,
+                                        profile_size.get('slope'),
+                                        bv['friction_manning'],
+                                        bv['friction_begroeiing'],
+                                        bv['begroeiingsdeel']
+                                    )
+                                else:
+                                    gradient_pitlo_griffioen_inlaat = 999
                             if gradient_pitlo_griffioen_inlaat and gradient_pitlo_griffioen_inlaat > gradient_pitlo_griffioen:
                                 afvoer_leidend = 0
                             else:
