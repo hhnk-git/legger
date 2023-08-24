@@ -4,6 +4,7 @@
 import datetime
 import logging
 import time
+import traceback
 from legger.sql_models.legger import BegroeiingsVariant, HydroObject
 from legger.sql_models.legger_database import LeggerDatabase
 from legger.sql_models.legger_database import load_spatialite
