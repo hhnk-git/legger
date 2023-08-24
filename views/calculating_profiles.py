@@ -277,7 +277,10 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         except Exception as e:
             # raise e
             log.exception(e)
-            self.feedbackmessage = self.feedbackmessage + f"\n{datetime.datetime.now().isoformat()[:19]} - Fout, profielen konden niet worden berekend. melding: {e}"
+            self.feedbackmessage = self.feedbackmessage + (f"\n{datetime.datetime.now().isoformat()[:19]} - "
+                                                           f"Fout, profielen konden niet worden berekend. melding: \n"
+                                                           f"{e}\n"
+                                                           f"{traceback.format_exc()}")
         finally:
             self.feedbacktext.setText(self.feedbackmessage)
 

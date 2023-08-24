@@ -182,7 +182,7 @@ class HydroObject(object):
                  debiet_inlaat):
 
         self.object_id = object_id
-        self.ditch_depth = Decimal(ditch_depth)
+        self.ditch_depth = Decimal(ditch_depth) if ditch_depth is not None else None
         self.zpeil_diff = Decimal(zpeil_diff) if zpeil_diff is not None else Decimal(0)
         self.ditch_width = Decimal(ditch_width) if ditch_width is not None else Decimal(999)
         self.category = category
