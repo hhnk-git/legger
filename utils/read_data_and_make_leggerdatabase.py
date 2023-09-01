@@ -148,6 +148,20 @@ class CreateLeggerSpatialite(object):
         FROM imp_gw_pbp pbp, imp_iws_geo_beschr_profielpunten ipp, imp_gw_prw prw 
         WHERE pbp.pbp_id = ipp.pbp_pbp_id AND pbp.prw_prw_id = prw.prw_id
         """))
+        # profielpunten met te weinig punten er uit
+        session = self.db.get_session()
+        session.execute(text("""
+        WITH cnt AS (
+            WITH cnt AS (
+                SELECT count(*) as count, prw_id, pro_pro_id
+                FROM profielpunten
+                GROUP BY prw_id, pro_pro_id
+                ORDER BY count(*)
+                )
+            DELETE FROM profielpunten WHERE profielpunten.pro_pro_id IN (
+                SELECT cnt.pro_pro_id from cnt WHERE count < 4
+                )
+                             """))
 
         # vullen profielen
         session.execute(text("""
