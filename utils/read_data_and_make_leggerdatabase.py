@@ -148,19 +148,6 @@ class CreateLeggerSpatialite(object):
         FROM imp_gw_pbp pbp, imp_iws_geo_beschr_profielpunten ipp, imp_gw_prw prw 
         WHERE pbp.pbp_id = ipp.pbp_pbp_id AND pbp.prw_prw_id = prw.prw_id
         """))
-        # profielpunten met te weinig punten er uit
-        session = self.db.get_session()
-        session.execute(text("""
-            WITH cnt AS (
-                SELECT count(*) as count, prw_id, pro_pro_id
-                FROM profielpunten
-                GROUP BY prw_id, pro_pro_id
-                ORDER BY count(*)
-                )
-            DELETE FROM profielpunten WHERE profielpunten.pro_pro_id IN (
-                SELECT cnt.pro_pro_id from cnt WHERE count < 4
-                )
-                             """))
 
         # vullen profielen
         session.execute(text("""
@@ -271,51 +258,54 @@ class CreateLeggerSpatialite(object):
                  """))
 
         session.execute(text("""
-WITH
-    cnt as (SELECT 1 x union select x+1 from cnt where x<24)
-	, pnt as (
-			SELECT h.id, cnt.x / 25.0 as fraction, Line_Interpolate_Point(h.geometry, cnt.x / 25.0) as geom, ST_LENGTH(h.geometry) as length
-            FROM hydroobject h, cnt
-							--WHERE h.id = 165183  -- FOR DEBUGGING
-	), pnt_buf as (
-			SELECT p.*, ST_Expand(p.geom, MIN(1, length/ 11 )) as geom_buffer from pnt p)
-	,link as (
-			SELECT 
-                p.id as h_id, 
-                d.id as d_id, 
-                p.fraction, 1 - st_distance(p.geom, d.geometry) as score, 
-                abs(d.debiet) as flow 
-             FROM pnt_buf p, debiet_3di d 
-             WHERE st_intersects(p.geom_buffer, d.geometry) 
-                AND d.ROWID IN (SELECT ROWID 
-                                FROM SpatialIndex
-                                WHERE f_table_name = 'debiet_3di' AND search_frame = p.geom_buffer)),
-    score as (SELECT h_id, d_id, sum(score) as score, max(flow) as flow, count(*) as cnt
-              FROM link 
-              GROUP BY h_id, d_id 
-              ORDER BY h_id, 3 DESC, 4 DESC),
-    linked as (SELECT distinct * FROM score WHERE cnt >= 2 GROUP BY h_id),
-    matched as (SELECT  
-                    h.id as hydro_id, 
-                    CASE WHEN Line_Locate_Point(h.geometry, st_startpoint(d.geometry)) <= Line_Locate_Point(h.geometry, st_endpoint(d.geometry)) THEN d.debiet ELSE -1 * d.debiet END as debiet_3di,
-                    round (l.score / 45.0 * 100.0, 2) as score
-                FROM linked l, hydroobject h, debiet_3di d  
-                WHERE l.h_id = h.id and l.d_id = d.id)
+                WITH
+                    cnt as (SELECT 1 x union select x+1 from cnt where x<24)
+                    , pnt as (
+                            SELECT h.id, cnt.x / 25.0 as fraction, Line_Interpolate_Point(h.geometry, cnt.x / 25.0) as geom, ST_LENGTH(h.geometry) as length
+                            FROM hydroobject h, cnt
+                                            --WHERE h.id = 165183  -- FOR DEBUGGING
+                    ), pnt_buf as (
+                            SELECT p.*, ST_Expand(p.geom, MIN(1, length/ 11 )) as geom_buffer from pnt p)
+                    ,link as (
+                            SELECT 
+                                p.id as h_id, 
+                                d.id as d_id, 
+                                p.fraction, 1 - st_distance(p.geom, d.geometry) as score, 
+                                abs(d.debiet) as flow 
+                            FROM pnt_buf p, debiet_3di d 
+                            WHERE st_intersects(p.geom_buffer, d.geometry) 
+                                AND d.ROWID IN (SELECT ROWID 
+                                                FROM SpatialIndex
+                                                WHERE f_table_name = 'debiet_3di' AND search_frame = p.geom_buffer)),
+                    score as (SELECT h_id, d_id, sum(score) as score, max(flow) as flow, count(*) as cnt
+                            FROM link 
+                            GROUP BY h_id, d_id 
+                            ORDER BY h_id, 3 DESC, 4 DESC),
+                    linked as (SELECT distinct * FROM score WHERE cnt >= 2 GROUP BY h_id),
+                    matched as (SELECT  
+                                    h.id as hydro_id, 
+                                    CASE WHEN Line_Locate_Point(h.geometry, st_startpoint(d.geometry)) <= Line_Locate_Point(h.geometry, st_endpoint(d.geometry)) 
+                                        THEN d.debiet 
+                                        ELSE -1 * d.debiet
+                                    END as debiet_3di,
+                                    round (l.score / 45.0 * 100.0, 2) as score
+                                FROM linked l, hydroobject h, debiet_3di d  
+                                WHERE l.h_id = h.id and l.d_id = d.id)
 
-    UPDATE hydroobject
-    SET 
-        debiet_3di = (
-			SELECT m.debiet_3di FROM matched m
-				--, hydroobject -- FOR DEBUGGING
-				WHERE m.hydro_id = id
-					),
-        score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
-         """))
+                    UPDATE hydroobject
+                    SET 
+                        debiet_3di = (
+                            SELECT m.debiet_3di FROM matched m
+                                --, hydroobject -- FOR DEBUGGING
+                                WHERE m.hydro_id = id
+                                    ),
+                        score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
+                        """))
 
         session.execute(text("""
-    UPDATE hydroobject
-    SET debiet = debiet_3di
-                 """))
+            UPDATE hydroobject
+            SET debiet = debiet_3di
+                        """))
 
         session.execute(text("""
             WITH 
@@ -329,6 +319,21 @@ WITH
             WHERE kenmerken.hydro_id in (SELECT hydro_id FROM max_diepte)    
             """))
 
+        session.commit()
+                
+        # profielpunten met te weinig punten er uit
+        session = self.db.get_session()
+        session.execute(text("""
+            WITH cnt AS (
+                SELECT count(*) as count, prw_id, pro_pro_id
+                FROM profielpunten
+                GROUP BY prw_id, pro_pro_id
+                ORDER BY count(*)
+                )
+            DELETE FROM profielpunten WHERE profielpunten.pro_pro_id IN (
+                SELECT cnt.pro_pro_id from cnt WHERE count < 4
+                )
+                             """))
         session.commit()
 
     def delete_imported_tables(self):
