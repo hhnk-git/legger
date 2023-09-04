@@ -151,7 +151,6 @@ class CreateLeggerSpatialite(object):
         # profielpunten met te weinig punten er uit
         session = self.db.get_session()
         session.execute(text("""
-        WITH cnt AS (
             WITH cnt AS (
                 SELECT count(*) as count, prw_id, pro_pro_id
                 FROM profielpunten
