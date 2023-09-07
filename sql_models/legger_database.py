@@ -2,7 +2,6 @@ import copy
 import logging
 import os
 import sqlite3
-
 from osgeo import ogr
 from sqlalchemy import create_engine
 from sqlalchemy.event import listen
@@ -35,7 +34,7 @@ def load_spatialite_base(con, connection_record):
         try:
             cur.execute("select load_extension('{}', '{}')".format(lib, entry_point))
         except sqlite3.OperationalError:
-            log.exception(
+            log.info(
                 "Loading extension %s from %s failed, trying the next", entry_point, lib
             )
             continue
@@ -175,4 +174,3 @@ class LeggerDatabase(object):
             statement = """VACUUM;"""
             with self.engine.begin() as connection:
                 connection.execute(text(statement))
-

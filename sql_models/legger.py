@@ -212,10 +212,12 @@ Profielen.profielpunten = relationship(
     Profielpunten,
     uselist=True,
     back_populates="profiel")
-Profielpunten.profiel = relationship(
-    Profielen,
-    uselist=False,
-    back_populates="profielpunten")
+
+
+# Profielpunten.profiel = relationship(
+#     Profielen,
+#     uselist=False,
+#     back_populates="profielpunten")
 
 
 class Kenmerken(Base):
@@ -274,7 +276,6 @@ class Varianten(Base):
                       index=True)
 
     standaard_profiel_code = Column(String())
-
 
     begroeiingsvariant = relationship(BegroeiingsVariant,
                                       # foreign_keys='begroeiingsvariant_id',

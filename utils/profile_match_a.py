@@ -6,15 +6,22 @@
 
 import logging
 import matplotlib
+import os
 
 matplotlib.use('AGG')
 
+import sqlite3
 import matplotlib.pyplot as plt
 import shapely
 import shapely.geometry
 from shapely.errors import TopologicalError
 # from descartes import PolygonPatch
 from matplotlib.pyplot import savefig
+
+try:
+    from legger.sql_models.legger_database import load_spatialite
+except ImportError:
+    from sql_models.legger_database import load_spatialite
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +98,7 @@ def peilperprofiel(cur, peilcriterium="min", debug=0):
     return prof
 
 
-def haal_meetprofielen1(cur, profielsoort="Z1", peilcriterium="min", debug=0):
+def haal_meetprofielen1(cur, profielsoort="Z1", filter_profiel_id=None):
     """ Haal de gemeten profieelpunten op uit de database voor de profielsoort vastebodem (Z1)
      Invoer:    cur = een cursor naar de database met gemetenprofielen, hydroobjecten en theoretische profielen
                 profielsoort = de code voor de harde bodem
@@ -100,87 +107,39 @@ def haal_meetprofielen1(cur, profielsoort="Z1", peilcriterium="min", debug=0):
                 met per profielid:
                 het hydroid (hydro object id)
                 het peil
-                de  punten van het gemeten profiel + extra begin- en eindpunt 100m hoger """
+                de punten van het gemeten profiel + extra begin- en eindpunt 100m hoger """
     prof = {}
-    peilvanprofiel = {}
-    q = 'select profielen.pro_id, hydroobject.id, hydroobject.streefpeil from profielen inner join hydroobject ' \
-        'on (profielen.hydro_id=hydroobject.id)'
-    # logger.debug(q)
-    for r in cur.execute(q):
-        peilvanprofiel[r[0]] = (r[1], r[2])
-    # logger.debug(peilvanprofiel)
-    # peilvanprofiel = peilperprofiel(cur, peilcriterium, debug) # per profielid het hydroobject_id en het peil
-    # q = '''select "c"."pro_pro_id", "b"."iws_volgnr", X("a"."GEOMETRY"), Y("a"."GEOMETRY"),
-    #         "b"."iws_hoogte", a."OGC_FID"
-    #        from "profielpunten" as "a"
-    #         join "pbp" as "b" on ("a"."OGC_FID" = "b"."OGC_FID")
-    #         join "prw" as "c" on ("b"."OGC_FID" = "c"."OGC_FID")
-    #        where "c"."pro_pro_id" = %d and "c"."osmomsch" = "%s"
-    #       order by "b"."iws_volgnr"
-    #            '''
-    # q = '''select pro.pro_id, pbp.iws_volgnr,
-    # X(profielpunten.GEOMETRY), Y(profielpunten.GEOMETRY),
-    # pbp.iws_hoogte, pro.ovk_ovk_id, pro.proident
-    # from pro inner join prw on (pro.pro_id=prw.pro_pro_id)
-    # inner join pbp on (prw.prw_id=pbp.prw_prw_id)
-    # inner join profielpunten on (pbp.pbp_id=profielpunten.pbp_pbp_id)
-    # where pro.pro_id = %d and prw.osmomsch="%s"
-    # order by pbp.iws_volgnr'''
-    # q = '''select pro.pro_id, pbp.iws_volgnr,
-    # X(profielpunten.GEOMETRY), Y(profielpunten.GEOMETRY),
-    # pbp.iws_hoogte, pro.ovk_ovk_id, pro.proident
-    # from pro inner join prw on (pro.pro_id=prw.pro_pro_id)
-    # inner join pbp on (prw.OGC_FID=pbp.OGC_FID)
-    # inner join profielpunten on (pbp.OGC_FID=profielpunten.OGC_FID)
-    # where pro.pro_id = %d and prw.osmomsch="%s"
-    # order by pbp.iws_volgnr'''
-    q = '''select pl.pro_id, pp.iws_volgnr, X(pp.GEOMETRY), Y(pp.GEOMETRY), pp.iws_hoogte, pl.hydro_id, pl.proident
+
+    q = 'select profielen.pro_id, profielen.proident, hydroobject.id, hydroobject.streefpeil from profielen inner join hydroobject ' \
+        'on (profielen.hydro_id=hydroobject.id) WHERE hydroobject.streefpeil IS NOT NULL '
+    if filter_profiel_id is not None:
+        q += ' WHERE profielen.id = %d' % filter_profiel_id
+
+    q_punten = '''select pl.pro_id, pp.iws_volgnr, X(pp.GEOMETRY), Y(pp.GEOMETRY), pp.iws_hoogte, pl.hydro_id
            from profielen as pl inner join profielpunten as pp on (pl.pro_id = pp.pro_pro_id)
            where pl.pro_id = %d and pp.osmomsch = "%s" 
            order by pp.iws_volgnr'''
-    for proid in peilvanprofiel:
-        if peilvanprofiel[proid][1] is not None:  # er is een peil !
-            prof[proid] = {}  # veronderstelling 1 profiel per hydroobject is fout!!!! nu gewoon proid invullen
-            prof[proid]['hydroid'] = peilvanprofiel[proid][0]
-            prof[proid]['peil'] = peilvanprofiel[proid][1]
-            s = 0
-            for r in cur.execute(q % (proid, profielsoort)):
-                if s == 0:  # beginconditie, eerste punt van profiel 1000m hoger, zodat altijd boven peil gestart wordt
-                    prof[proid]['orig'] = [[r[2], r[3], max(r[4], peilvanprofiel[proid][1]) + 1000.0, 0]]
-                    s += 1
-                prof[proid]["orig"].append([r[2], r[3], r[4], r[5]])
-            # laatste punt van profiel, 1000 m hoger
-            prof[proid]["orig"].append([r[2], r[3], max(r[4], peilvanprofiel[proid][1]) + 1000.0, 0])
-            prof[proid]['proident'] = r[6]
-    # logger.debug('aantal profielen in hydro-objecten met een peil: %d', len(prof))
-    return prof
+    cur.execute(q)
 
+    for proid, proident, hydro_id, streefpeil in list(cur.fetchall()):
+        prof[proid] = {}  # Er kunnen meerdere gemeten profielen per hydrovak zijn.
+        prof[proid]['hydroid'] = hydro_id
+        prof[proid]['peil'] = streefpeil
+        prof[proid]['proident'] = proident
+        prof[proid]["orig"] = []
 
-def interpoleerafstand(l, r, p):
-    """interpoleer de afstand op grond van de hoogtes
-    Invoer: l  = linker list met afstand, x, y en z
-            r  = rechter list met [a, x, y, z]
-            p = z waarde tussen l[3] en r[3] in
+        cur.execute(q_punten % (proid, profielsoort))
+        for r in cur.fetchall():
+            prof[proid]["orig"].append([r[2], r[3], r[4], r[5]])
 
-    Uitvoer:    tuple van afstand a en  hoogte z
-    """
-    factor = (p - l[3]) / (r[3] - l[3])
-    return l[0] + factor * (r[0] - l[0]), p
+        if len(prof[proid]["orig"]) > 0:
+            # eerste en laatste punt 1000 meter hoger
+            prof[proid]["orig"][0][2] = max(prof[proid]["orig"][0][2], streefpeil) + 1000.0
+            prof[proid]["orig"][-1][2] = max(prof[proid]["orig"][-1][2], streefpeil) + 1000.0
 
-
-def projecteerprofielen(prof, projectie="eindpunt", debug=0):
-    """ Verrijk profielen met de projectie op een rechte lijn
-    Invoer: prof = dictionary met gemeten profielen; punten staan onder key "orig"
-            projectie = keuze soort projectie van de xy punten van het gemeten profiel; waarden:
-                   eindpunt: op de rechte tussen de eindpunten van het gemeten profiel
-                   loodlijn: op de loodlijn op het lijnstuk van het hydroObject tpv het kruispunt
-                             van het lijnstuk van het hydroobject met de gemeten profiellijn (pro)
-    Uitvoer: prof verrijkt met de key "proj" met daarin een list van lists van afstand-geprojecteerd,
-                x-geprojecteerd, y-geprojecteerd en diepte
-    In eerste instantie is alleen eindpunt geimplementeerd!
-    """
-    if projectie == 'eindpunt':
-        for proid in prof:
+            # Verrijk profielen met de projectie op een rechte lijn
+            # prof verrijkt met de key "proj" met daarin een list van lists van afstand-geprojecteerd,
+            # x-geprojecteerd, y-geprojecteerd en diepte
             lijn = shapely.geometry.LineString([(prof[proid]['orig'][0][0], prof[proid]['orig'][0][1]),
                                                 (prof[proid]['orig'][-1][0], prof[proid]['orig'][-1][1])])
             prof[proid]['proj'] = []
@@ -188,11 +147,20 @@ def projecteerprofielen(prof, projectie="eindpunt", debug=0):
                 afstand = lijn.project(shapely.geometry.Point((p[0], p[1])))
                 pr = lijn.interpolate(afstand)
                 prof[proid]['proj'].append([afstand, pr.x, pr.y, p[2], p[3]])
-    else:
-        pass
-        # logger.debug("PROJECTIECRITERIUM NIET GELDIG %s, GEEN PROJECTIE!", projectie)
-    # logger.debug("aantal geprojecteerde profielen: %d", len(prof))
+
     return prof
+
+
+def interpoleerafstand(l, r, p):
+    """interpoleer de afstand op grond van de hoogtes
+    Invoer: l = linker list met afstand, x, y en z
+            r = rechter list met [a, x, y, z]
+            p = z waarde tussen l[3] en r[3] in
+
+    Uitvoer:    tuple van afstand a en  hoogte z
+    """
+    factor = (p - l[3]) / (r[3] - l[3])
+    return l[0] + factor * (r[0] - l[0]), p
 
 
 def verrijkgemprof(cur, prof):
@@ -461,8 +429,8 @@ def controlefig(gemprof, theoprof, afstand, fit, fractie, overdiepte, overlinks,
     return
 
 
-def doe_profinprof(cur0, cur1, aantalstappen=200, precisie=0.0001, codevastebodem="Z1", peilcriterium="min",
-                   projectiecriterium="eindpunt", obdiepte=0.001, debug=0):
+def doe_profinprof(cur0, cur1, aantalstappen=200, precisie=0.0001, codevastebodem="Z1",
+                   obdiepte=0.001, debug=0, profiel_id=None):
     """
 
     :param cur0: cursor naar de legger database
@@ -470,81 +438,72 @@ def doe_profinprof(cur0, cur1, aantalstappen=200, precisie=0.0001, codevastebode
     :param aantalstappen:
     :param precisie:
     :param codevastebodem:
-    :param peilcriterium:
-    :param projectiecriterium:
     :param obdiepte:
     :param debug:
     :return:
     """
-    if True:
-        # maaktabellen(cur0) # IS NIET MEER NODIG
-        # logger.debug('voor gemeten profielen')
-        gemetenprofielen = haal_meetprofielen1(cur0, codevastebodem, peilcriterium, debug)
-        gemetenprofielen = projecteerprofielen(gemetenprofielen, projectiecriterium, debug)
-        # verrijkgemprof(cur0, gemetenprofielen) NIET MEER NODIG
 
-        # alleen theoretische profielen die liggen in hydro-objecten waar ook gemeten profielen zijn ophalen
-        q = """select id, id, talud, diepte, bodembreedte from varianten where hydro_id='%s'"""
-        qm = """insert into profielfiguren (id_hydro, profid, type_prof, coord, peil) values (%d, "%s", "m", "%s", %f)"""
-        qt = """insert into profielfiguren (id_hydro, profid, type_prof, coord, peil, t_talud, t_waterdiepte, t_bodembreedte, 
-                t_fit, t_afst, g_rest, t_overdiepte, t_overbreedte_l, t_overbreedte_r) values 
-                (%d, "%s", "t", "%s", %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"""
-        for profielid in gemetenprofielen.keys():
+    gemetenprofielen = haal_meetprofielen1(cur0, codevastebodem, profiel_id)
+
+    # alleen theoretische profielen die liggen in hydro-objecten waar ook gemeten profielen zijn ophalen
+    q = """select id, id, talud, diepte, bodembreedte from varianten where hydro_id='%s'"""
+    qm = """insert into profielfiguren (id_hydro, profid, type_prof, coord, peil) values (%d, "%s", "m", "%s", %f)"""
+    qt = """insert into profielfiguren (id_hydro, profid, type_prof, coord, peil, t_talud, t_waterdiepte, t_bodembreedte, 
+            t_fit, t_afst, g_rest, t_overdiepte, t_overbreedte_l, t_overbreedte_r) values 
+            (%d, "%s", "t", "%s", %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"""
+    for profielid, profiel in gemetenprofielen.items():
+        try:
             # mkgemprof aanroepen met list van lists met afstand, x, y, z (geprojecteerd); en het peil;
             # levert een shapely polygoon
-            gemprofshapely = mkgemprof(gemetenprofielen[profielid]['proj'], gemetenprofielen[profielid]['peil'])
+            gemprofshapely = mkgemprof(profiel['proj'], profiel['peil'])
 
             if gemprofshapely.is_empty:
-                logger.warning('Profiel %i geeft een lege profiel geometry terug. skip profiel', profielid)
+                logger.warning('Profiel %s (%i) geeft een lege profiel geometry terug. skip profiel',
+                               profiel['proident'], profielid)
                 continue
 
-            h = qm % (gemetenprofielen[profielid]['hydroid'], gemetenprofielen[profielid]['proident'],
-                      gemprofshapely.wkt, gemetenprofielen[profielid]['peil'])
+            h = qm % (profiel['hydroid'], profiel['proident'],
+                      gemprofshapely.wkt, profiel['peil'])
             # logger.debug(h)
             cur1.execute(h)
-            for theo_data in cur0.execute(q % gemetenprofielen[profielid]['hydroid']):
+            cur0.execute(q % profiel['hydroid'])
+            for theo_data in cur0.fetchall():
                 # mkmogelijkprofiel aanroepen met talud, waterdiepte, bodembreedte en peil, levert een shapely polygon
                 theoprofshapely = mkmogelijktheoprofiel(theo_data[2], theo_data[3], theo_data[4],
-                                                        gemetenprofielen[profielid]['peil'])
+                                                        profiel['peil'])
                 # prof_in_prof aanroepen met gemetenprofiel, theoretisch profiel aantal stappen en aanvaardbaar verschil
                 #  (profielen bestaan uit shapely polygons)
                 fit, afstand, fractie, overdiepte, overlinks, overrechts = \
                     prof_in_prof(gemprofshapely, theoprofshapely, aantalstappen, precisie, obdiepte, debug)
 
-                cur1.execute(qt % (gemetenprofielen[profielid]['hydroid'], theo_data[1],
+                cur1.execute(qt % (profiel['hydroid'], theo_data[1],
                                    shapely.affinity.translate(theoprofshapely, afstand, 0.0, 0.0).wkt,
-                                   gemetenprofielen[profielid]['peil'], theo_data[2], theo_data[3], theo_data[4],
+                                   profiel['peil'], theo_data[2], theo_data[3], theo_data[4],
                                    fit, afstand, fractie, overdiepte, overlinks, overrechts))
-                # logger.debug('na insert')
-        if debug:
-            controlefig(gemprofshapely, theoprofshapely, afstand, fit, fractie, overdiepte, overlinks,
-                        overrechts, gemetenprofielen[profielid]['hydroid'], profielid,
-                        theo_data[2], theo_data[3], theo_data[4], gemetenprofielen[profielid]['peil'])
-        cur0.execute('create index profielfiguren0 on profielfiguren(id_hydro)')
-        cur0.execute('create index profielfiguren1 on profielfiguren(profid)')
-        # cur0.execute('vacuum')
-        resultaat = "klaar"
-    # except ImportError:
-    #    resultaat = "Niet correct, run evt opnieuw met debug = 1 om te onderzoeken"
+        except Exception as e:
+            logger.error('Fout in verwerken profiel %s (%i), hydrovak_id %s', profiel['proident'], profielid,
+                         profiel['hydroid'])
+            logger.exception(e)
+
+    cur0.execute('CREATE INDEX IF NOT EXISTS profielfiguren0 on profielfiguren(id_hydro)')
+    cur0.execute('CREATE INDEX IF NOT EXISTS profielfiguren1 on profielfiguren(profid)')
+    # cur0.execute('vacuum')
+    resultaat = "klaar"
+
     return resultaat
 
-#
-# #   start van het  programma
-# #   Variabelen
-# aantalstappen = 200  # Het aantal stappen dat gebruikt wordt door prof_in_prof (stapgrootte is:
-#                      # (breedte gemeten profiel + 2 * breedte theoretisch profiel) / aantalstappen
-# precisie = 0.0001  # De afwijking die aanvaardbaar is voor de vaststelling van gelijkheid van oppervlakken
-# codevastebodem = "Z1"  # de code in de profieldata voor de vaste bodem
-# peilcriterium = "min"  # het criterium om het peil voor een hydroobject te kiezen, geldige waarden min en max
-# projectiecriterium = 'eindpunt'  # het criterium voor de projectie van de profielpunten, geldige waarden eindpunt
-# obdiepte = 0.001  # de diepte waarop de overbreedte bepaald moet worden
-# debug = 0  # vlag om extra output te genereren, geldige waarden 0 of 1
-#
-# con = sql.connect('../tests/data/HHW_20180129.sqlite')
-# cur0 = con.cursor()
-# cur1 = con.cursor()
-#
-# resultaat = doe_profinprof(cur0, cur1, aantalstappen, precisie, codevastebodem, peilcriterium,
-#                            projectiecriterium, obdiepte, debug)
-# con.commit()
-# con.close()
+
+if __name__ == '__main__':
+    import sys
+
+    os.environ["PROJ_LIB"] = "/Applications/QGIS-LTR.app/Contents/Resources/proj"
+    os.environ["GDAL_DATA"] = "/Applications/QGIS-LTR.app/Contents/Resources/gdal"
+    sys.path.append('/Users/bastiaanroos/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins')
+
+    conn = load_spatialite('//Users/bastiaanroos/Documents/testdata/leggertool/legger_hub_update_bastiaan2.sqlite')
+    cur0 = conn.cursor()
+    cur1 = conn.cursor()
+    #
+    resultaat = doe_profinprof(cur0, cur1, debug=True)
+    print(resultaat)
+    a = 1
