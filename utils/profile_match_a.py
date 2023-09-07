@@ -335,7 +335,6 @@ def prof_in_prof(profgem, proftheo, aantstap=100, delta=0.001, obdiepte=0.001, d
     rechtsover = 0.0
     restbak = profgem.difference(shapely.affinity.translate(proftheo, optimaal, 0.0, 0.0))
     hlijn = restbak.intersection(oblijn)  # restbak is restant gemeten profiel min theor. profiel
-    # logger.debug(hlijn)
     if obdiepte < (profgem.bounds[3] - profgem.bounds[1]):  # de obdiepte is hoger dan de bodem van het gemetenprofiel
         try:
             xlinks = clijn.coords[0][0]
@@ -351,15 +350,12 @@ def prof_in_prof(profgem, proftheo, aantstap=100, delta=0.001, obdiepte=0.001, d
                     if (hlijn[0].coords[1][0] == xlinks) and (hlijn[2].coords[1][0] == xrechts):
                         linksover = hlijn[1].length
                         rechtsover = hlijn[2].length
-                else:
-                    # logger.debug(hlijn)
-                    pass
             except:
-                logger.info("hlijn is geen MultiLineString")
-                pass  # hlijn is geen MultiLineString
+                # logger.info("hlijn is geen MultiLineString")
+                pass
         except:
-            logger.info("clijn is geen LineString")
-            # clijn is geen LineString (mogelijk een MultiLineString)
+            # logger.info("clijn is geen LineString")
+            pass
     return fit, optimaal, fractie, overdiepte, linksover, rechtsover
 
 
