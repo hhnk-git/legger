@@ -344,12 +344,12 @@ class Network(object):
                 if line.category == 1:
                     return max(abs(line.debiet_3di or 0), abs(line.debiet_modified or 0))
                 else:
-                    return abs(line.debiet_modified)
+                    return abs(line.debiet_modified or 0)
             else:
                 if line.category == 1:
                     return -max(abs(line.debiet_3di or 0), abs(line.debiet_modified or 0))
                 else:
-                    return -abs(line.debiet_modified)
+                    return -abs(line.debiet_modified or 0)
 
         self.db_cursor.executemany("""
             UPDATE hydroobject SET
