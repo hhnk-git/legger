@@ -966,16 +966,12 @@ class LeggerWidget(QDockWidget):
             over_width = None
             over_depth = None
 
-            if profile.figuren:
-                over_width = profile.figuren[0].t_overbreedte_l + profile.figuren[0].t_overbreedte_r
-                over_depth = profile.figuren[0].t_overdiepte
-            else:
-                if profile.hydro.kenmerken and profile.hydro.kenmerken[
-                    0].diepte is not None and profile.diepte is not None:
-                    over_depth = profile.hydro.kenmerken[0].diepte - profile.diepte
-                if profile.hydro.kenmerken and profile.hydro.kenmerken[
-                    0].breedte is not None and profile.waterbreedte is not None:
-                    over_width = profile.hydro.kenmerken[0].breedte - profile.waterbreedte
+            if (profile.hydro.kenmerken and profile.hydro.kenmerken[0].diepte is not None
+                    and profile.diepte is not None):
+                over_depth = profile.hydro.kenmerken[0].diepte - profile.diepte
+            if (profile.hydro.kenmerken and profile.hydro.kenmerken[0].breedte is not None
+                    and profile.waterbreedte is not None):
+                over_width = profile.hydro.kenmerken[0].breedte - profile.waterbreedte
 
             prof_verhang = profile.verhang
             if prof_verhang is None or (profile.verhang_inlaat is not None and prof_verhang < profile.verhang_inlaat):
