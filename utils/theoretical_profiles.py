@@ -163,8 +163,8 @@ class HydroObject(object):
     }
     over_depth = {
         'veen': [
-            {'max_width_m': Decimal(2.0), 'over_depth': Decimal(0.10)},
-            {'max_width_m': None, 'over_depth': Decimal(0.15)},
+            {'max_width_m': Decimal(2.0), 'over_depth': Decimal(0.25)},
+            {'max_width_m': None, 'over_depth': Decimal(0.35)},
         ],
         'default': [
             {'max_width_m': Decimal(2.0), 'over_depth': Decimal(0.15)},
