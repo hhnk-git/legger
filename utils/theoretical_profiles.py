@@ -157,9 +157,8 @@ class HydroObject(object):
             {'max_width_m': None, 'slope_1_on': Decimal(4.0)},
         ],
         'default': [
-            {'max_width_m': Decimal(4.0), 'slope_1_on': Decimal(2.0)},
-            {'max_width_m': Decimal(10.0), 'slope_1_on': Decimal(3.0)},
-            {'max_width_m': None, 'slope_1_on': Decimal(4.0)},
+            {'max_width_m': Decimal(6.0), 'slope_1_on': Decimal(1.5)},
+            {'max_width_m': None, 'slope_1_on': Decimal(2.0)},
         ]
     }
     over_depth = {
