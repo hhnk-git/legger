@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-import sqlite3
 from collections import OrderedDict
+from qgis._core import QgsFeature, QgsGeometry, QgsPointXY
 from typing import List
 
-from qgis._core import QgsFeatureRequest, QgsFeature, QgsGeometry, QgsPointXY, QgsExpression
 from legger.qt_models.legger_tree import hydrovak_class, LeggerTreeItem
 from legger.utils.formats import make_type
 from legger.utils.spatialite import load_spatialite
@@ -75,8 +74,6 @@ class Line(Definitions):
             return self.debiet_3di
 
     def set_debiet_modified(self, debiet, surplus=None):
-        if self.id == 140870:
-            a = 1
 
         self.surplus = surplus
         if debiet is None:
@@ -508,8 +505,6 @@ class Network(object):
         while len(queue) > 0:
             node, tot_weight = queue.pop()
             for line in node.inflow(mode, include_nones=True):
-                # if line.id in [474252, 140888]:
-                #     a = 1
 
                 line: Line
                 if line.category == 1:
@@ -585,8 +580,6 @@ class Network(object):
 
         while len(queue) > 0:
             node, tot_weight = queue.pop()
-            # if node.id == 113:
-            #     a = 1
 
             for line in node.inflow(mode, include_nones=True):
                 line: Line
@@ -624,8 +617,6 @@ class Network(object):
 
         while len(queue) > 0:
             node, tot_weight = queue.pop()
-            # if node.id == 113:
-            #     a = 1
 
             for line in node.outgoing():
                 line: Line
@@ -678,8 +669,6 @@ class Network(object):
         for node_nr, [line_nr, weight, _, _] in enumerate(tree):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
-                # if line.id == 1084919:
-                #     a = 1
 
                 line.extra_data['weight'] = weight
                 if line.inflow_node(mode).nr != node_nr:
@@ -690,8 +679,6 @@ class Network(object):
 
         for line in self.graph.lines:
             if line.extra_data.get('weight') is None:
-                # if line.id == 377326:
-                #     a = 1
                 weight_inflow = tree[line.inflow_node(mode).nr][1]
                 weight_outflow = tree[line.outflow_node(mode).nr][1]
                 if weight_inflow is not None and weight_outflow is not None:
@@ -719,8 +706,6 @@ class Network(object):
 
         while len(queue) > 0:
             node, tot_weight = queue.pop()
-            # if node.id == 113:
-            #     a = 1
 
             for line in node.outgoing():
                 line: Line
@@ -773,8 +758,6 @@ class Network(object):
         for node_nr, [line_nr, weight, _, _] in enumerate(tree):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
-                # if line.id == 1084919:
-                #     a = 1
 
                 line.extra_data['weight'] = weight
                 if line.inflow_node(mode).nr != node_nr:
@@ -785,8 +768,6 @@ class Network(object):
 
         for line in self.graph.lines:
             if line.extra_data.get('weight') is None:
-                # if line.id == 377326:
-                #     a = 1
                 weight_inflow = tree[line.inflow_node(mode).nr][1]
                 weight_outflow = tree[line.outflow_node(mode).nr][1]
                 if weight_inflow is not None and weight_outflow is not None:
@@ -825,12 +806,6 @@ class Network(object):
             # if node == last_added_node:
             #     break
 
-            # if 140870 in [l.id for l in node.outflow(modus=Definitions.FORCED)]:
-            #     a = 1
-
-            if node.nr in [18, 27]:
-                a = 1
-
             flow = node.flow(modus=Definitions.FORCED)
             flow_3di = node.flow(modus=Definitions.DEBIET_3DI)
             added_flow_on_point = flow_3di['outflow_debiet'] - flow_3di['inflow_debiet']
@@ -842,8 +817,6 @@ class Network(object):
             else:
                 all_inflows_not_known = len(
                     [l for l in node.inflow(modus=Definitions.FORCED) if l.debiet_modified is None])
-                # if 140870 in [l.id for l in node.outflow(modus=Definitions.FORCED)] and all_inflows_not_known == 0:
-                #     a = 1
 
                 if all_inflows_not_known == 0:
                     # all inflows are known, so we can process this node
@@ -926,8 +899,6 @@ class Network(object):
                     # wait with this node. add it to the end of the stack.
                     node_queue[node.id] = node
 
-                    if node.nr in [18, 27]:
-                        a = 1
                     # at this moment nothing has processed last loop
                     if node == last_node:
                         print(node.nr)
@@ -981,14 +952,13 @@ class Network(object):
         tree = self.force_direction(mode=Definitions.DEBIET_DB, do_reverse=True, ignore_manual_startnodes=True,
                                     start_min_category=4)
         # create dicts with lines (arcs), required information and mark vertexes in bi-directional islands
+        full_line_features = {feat['id']: feat for feat in self.full_line_layer.getFeatures()}
+
         for line in self.graph.lines:
             ids = line.id
-            exp = QgsExpression('"id" = {}'.format(ids))
-            request = QgsFeatureRequest(exp)
-            line_feature = None
             try:
-                line_feature = next(self.full_line_layer.getFeatures(request))
-            except StopIteration:
+                line_feature = full_line_features[ids]
+            except KeyError:
                 msg = ('Fout: Er is geen object in de tabel hydroobjects_kenmerken met id {}. '
                        'Mogelijk is in de DAMO export in de tabel hydroobject de id leeg.').format(ids)
                 logger.warning(msg)
@@ -997,9 +967,6 @@ class Network(object):
 
             inflow_node = line.inflow_node(Definitions.DEBIET_DB)
             outflow_node = line.outflow_node(Definitions.DEBIET_DB)
-
-            if ids in [110688, 110766]:
-                a = 1
 
             line_tree[line.nr] = hydrovak_class(
                 data_dict={
@@ -1053,12 +1020,7 @@ class Network(object):
             downstream_line = self.graph.lines[hline['downstream_line_nr']] if hline[
                                                                                    'downstream_line_nr'] is not None else None
 
-            if hline.get('id') in [110688, 110766]:
-                a = 1
-
             if hline['downstream_line_nr'] is None or not downstream_line_old:
-                if hline.get('id') in [110688, 110766]:
-                    a = 1
 
                 start_lines[line_nr] = {
                     'line_nr': line_nr,
@@ -1089,8 +1051,6 @@ class Network(object):
         # for all lines, set upstream arcs. Set only the one, who has the current arc as downstream arc (so joining
         # streams are forced into a tree structure with no alternative paths to same point
         for line_nr, hline in line_tree.items():
-            if hline.get('id') in [474252, 140888]:
-                a = 1
 
             if hline.get('tree_end'):
                 hline['upstream_line_nrs'] = []
@@ -1263,8 +1223,8 @@ class Network(object):
 
                 if i == 0:
                     new_tree_item = LeggerTreeItem(upstream_hydrovak, parent_tree_item)
-                    if parent_tree_item is None:
-                        a = 1
+                    # if parent_tree_item is None:
+                    #     a = 1
 
                     parent_tree_item.appendChild(new_tree_item)
                     new_parent_tree_item = parent_tree_item
