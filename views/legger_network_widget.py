@@ -1,8 +1,16 @@
 import datetime
 import logging
+from collections import OrderedDict
+from qgis.PyQt.QtCore import QMetaObject, QSize, Qt, pyqtSignal, QVariant, QSortFilterProxyModel
+from qgis.PyQt.QtWidgets import (QApplication, QComboBox, QDockWidget, QGroupBox, QHBoxLayout, QLabel, QPlainTextEdit,
+                                 QPushButton, QSizePolicy, QSpacerItem, QTabWidget, QVBoxLayout, QWidget, QCompleter,
+                                 QAbstractItemView)
+from qgis._core import QgsFields
+from qgis._gui import QgsMapToolIdentifyFeature, QgsMapToolIdentify
+from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsField, QgsPointXY
+
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QSplitter
-from collections import OrderedDict
 from legger.qt_models.area_tree import AreaTreeItem, AreaTreeModel, area_class
 from legger.qt_models.legger_tree import LeggerTreeItem, LeggerTreeModel
 from legger.qt_models.profile import ProfileModel
@@ -17,13 +25,6 @@ from legger.utils.network_utils import LeggerMapVisualisation
 from legger.utils.user_message import messagebar_message
 from legger.views.input_widget import NewWindow
 from legger.views.kijk_legger_popup import KijkProfielPopup
-from qgis.PyQt.QtCore import QMetaObject, QSize, Qt, pyqtSignal, QVariant, QSortFilterProxyModel
-from qgis.PyQt.QtWidgets import (QApplication, QComboBox, QDockWidget, QGroupBox, QHBoxLayout, QLabel, QPlainTextEdit,
-                                 QPushButton, QSizePolicy, QSpacerItem, QTabWidget, QVBoxLayout, QWidget, QCompleter,
-                                 QAbstractItemView)
-from qgis._core import QgsFields
-from qgis._gui import QgsMapToolIdentifyFeature, QgsMapToolIdentify
-from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsField, QgsPointXY
 from sqlalchemy import and_, or_
 
 from .network_graph_widgets import LeggerPlotWidget, LeggerSideViewPlotWidget
@@ -505,14 +506,13 @@ class LeggerWidget(QDockWidget):
                     score = None
                     if len(figuren) > 0:
                         figuur = figuren[0]
-                        over_width = "{0:.2f}".format(figuur.t_overbreedte_l + figuur.t_overbreedte_r) \
-                            if figuur.t_overbreedte_l is not None else over_width
+                        # over_width = "{0:.2f}".format(figuur.t_overbreedte_l + figuur.t_overbreedte_r) \
+                        #     if figuur.t_overbreedte_l is not None else over_width
                         score = "{0:.2f}".format(figuur.t_fit)
-                        over_depth = "{0:.2f}".format(
-                            figuur.t_overdiepte) if figuur.t_overdiepte is not None else over_depth
-                    else:
-                        over_depth = "{}*".format(try_round(over_depth, 2, '-'))
-                        over_width = "{}*".format(try_round(over_width, 2, '-'))
+                        # over_depth = "{0:.2f}".format(
+                        #     figuur.t_overdiepte) if figuur.t_overdiepte is not None else over_depth
+                    over_depth = "{}".format(try_round(over_depth, 2, '-'))
+                    over_width = "{}".format(try_round(over_width, 2, '-'))
 
                     verhang = try_round(profilev.verhang, 1, '-')
                     verhang_inlaat = try_round(profilev.verhang_inlaat, 1, '-')
