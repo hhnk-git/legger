@@ -1,11 +1,12 @@
-# todo:
-#  - 'opstuwingsnorm' selection?
-#  - correct or selectable friction values
 import datetime
 import logging
 import time
 import traceback
-from legger.sql_models.legger import BegroeiingsVariant, HydroObject
+from qgis.PyQt import QtCore, QtWidgets
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QWidget
+
+from legger.sql_models.legger import HydroObject
 from legger.sql_models.legger_database import LeggerDatabase
 from legger.sql_models.legger_database import load_spatialite
 from legger.utils.automatic_fill_legger import automatic_fill_legger
@@ -16,9 +17,6 @@ from legger.utils.read_tdi_results import (get_timestamps, read_tdi_culvert_resu
 from legger.utils.redirect_flows_to_main_branches import redirect_flows
 from legger.utils.snap_points import snap_points
 from legger.utils.theoretical_profiles import create_variants
-from qgis.PyQt import QtCore, QtWidgets
-from qgis.PyQt.QtCore import pyqtSignal
-from qgis.PyQt.QtWidgets import QComboBox, QWidget
 
 # -*- coding: utf-8 -*-
 
@@ -233,8 +231,8 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
                 self.feedbacktext.setText(self.feedbackmessage)
 
     def execute_redirect_flows(self):
-
-        redirect_flows(self.iface, self.polder_datasource)
+        change_flow_direction = self.change_flow_direction_checkbox.isChecked()
+        redirect_flows(self.iface, self.polder_datasource, change_flow_direction=change_flow_direction)
         self.feedbacktext.setText("Debieten zijn aangepast.")
 
     def explain_step2(self):
@@ -367,6 +365,9 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.groupBox_snap_points.setLayout(self.box_snap_points)  # box toevoegen aan groupbox
 
         # Assembling step 2 - redirect_flows
+        self.change_flow_direction_checkbox = QtWidgets.QCheckBox("stroomrichting aanpasbaar", self)
+        # self.change_flow_direction_checkbox.setText()
+
         self.step_redirect_flow_button = QtWidgets.QPushButton(self)
         self.step_redirect_flow_button.setObjectName("redirect_flow")
         self.step_redirect_flow_button.clicked.connect(self.execute_redirect_flows)
@@ -374,6 +375,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.groupBox_step_redirect_flows = QtWidgets.QGroupBox(self)
         self.groupBox_step_redirect_flows.setTitle("stap 2: kies eindpunten en daarna herverdeel 3di debiet")
         self.box_step_redirect_flows = QtWidgets.QVBoxLayout()
+        self.box_step_redirect_flows.addWidget(self.change_flow_direction_checkbox)
         self.box_step_redirect_flows.addWidget(self.step_redirect_flow_button)
         self.groupBox_step_redirect_flows.setLayout(self.box_step_redirect_flows)  # box toevoegen aan groupbox
 

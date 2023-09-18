@@ -5,13 +5,13 @@
 
 import logging
 
+from legger.sql_models.legger_views import create_legger_views
 # from legger.sql_models.legger_database import LeggerDatabase
 # from legger.sql_models.legger_database import load_spatialite
 # from legger.sql_models.legger_views import create_legger_views
 # from legger.utils.legger_map_manager import LeggerMapManager
 # from legger.utils.redirect_flows_to_main_branches_calculation import redirect_flow_calculation
 from legger.utils.network import Network, load_spatialite
-from legger.sql_models.legger_views import create_legger_views
 
 log = logging.getLogger(__name__)
 
@@ -21,11 +21,11 @@ log = logging.getLogger(__name__)
 #   begin point link.
 
 
-def redirect_flows(iface, path_legger_db):
-
+def redirect_flows(iface, path_legger_db, change_flow_direction=True):
     network = Network(path_legger_db)
     network.build_graph_tables()
-    network.force_direction()
+    if change_flow_direction:
+        network.force_direction()
     network.re_distribute_flow()
     network.save_network_values()
     log.info("Save redirecting flow result (update) to database ")

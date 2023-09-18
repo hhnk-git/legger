@@ -389,8 +389,7 @@ class Network(object):
 
         self.db_cursor.executescript("""
         -- maak alle begin en eindpunten
-            DROP TABLE IF EXISTS tmp_line_nodes
-            ;
+            DROP TABLE IF EXISTS tmp_line_nodes;
 
             CREATE TABLE tmp_line_nodes AS
             SELECT ROW_NUMBER() OVER (ORDER BY hydro_id, type DESC) as id, line_nodes.*
@@ -399,15 +398,13 @@ class Network(object):
                 FROM hydroobject
                 UNION ALL
                 SELECT id || 'e' as ids, id as hydro_id, 'eind' as type,  ST_Endpoint(GEOMETRY) AS geometry
-                FROM hydroobject) AS line_nodes
-            ;
+                FROM hydroobject) AS line_nodes;
 
             -- registreer de geometry (alleen bij debuggen)
             --SELECT RecoverGeometryColumn( 'tmp_line_nodes' , 'geometry' , 28992 , 'POINT' );
 
             -- combineer begin en eindpunten tot unieke punten voor elke locatie 
-            DROP TABLE IF EXISTS graph_nodes
-            ;
+            DROP TABLE IF EXISTS graph_nodes;
 
             CREATE TABLE graph_nodes AS
             SELECT 
@@ -420,15 +417,13 @@ class Network(object):
             FROM
             tmp_line_nodes
             GROUP BY geometry
-            ORDER BY id
-            ;
+            ORDER BY id;
 
             -- registreer de geometry
             SELECT RecoverGeometryColumn( 'graph_nodes' , 'geometry' , 28992 , 'POINT' );
 
             -- de graph lines als verlengde van de hydrovakken
-            DROP TABLE IF EXISTS graph_lines
-            ;
+            DROP TABLE IF EXISTS graph_lines;
 
             CREATE TABLE graph_lines AS
             SELECT 
@@ -446,12 +441,10 @@ class Network(object):
             INNER JOIN tmp_line_nodes tlns ON tlns.hydro_id =  ho.id AND tlns.type = 'start'
             INNER JOIN graph_nodes gns ON tlns.geometry = gns.geometry
             INNER JOIN tmp_line_nodes tlne ON tlne.hydro_id =  ho.id AND tlne.type = 'eind'
-            INNER JOIN graph_nodes gne ON tlne.geometry = gne.geometry
-            ;
+            INNER JOIN graph_nodes gne ON tlne.geometry = gne.geometry;
 
             -- ruim tijdelijke tabellen op
-            DROP TABLE IF EXISTS tmp_line_nodes
-            ;
+            DROP TABLE IF EXISTS tmp_line_nodes;
         """)
         self.db_cursor.execute('vacuum')
 
