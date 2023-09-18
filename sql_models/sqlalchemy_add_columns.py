@@ -24,7 +24,7 @@ def create_and_upgrade(engine, metadata):
 
     for model_table in metadata.sorted_tables:
         try:
-            db_table = Table(model_table.name, db_metadata, autoload=True)
+            db_table = Table(model_table.name, db_metadata, autoload_with=engine)
         except exc.NoSuchTableError:
             log.info('Creating table %s' % model_table.name)
             model_table.create(bind=engine)
