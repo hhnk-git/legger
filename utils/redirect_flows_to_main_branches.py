@@ -26,7 +26,16 @@ def redirect_flows(iface, path_legger_db, change_flow_direction=True):
     network.build_graph_tables()
     if change_flow_direction:
         network.force_direction()
-    network.re_distribute_flow()
+        network.re_distribute_flow()
+    else:
+        network.re_distribute_flow()
+        network.force_direction(only_without_flow=True)
+        network.re_distribute_flow()
+        network.force_direction(only_without_flow=True)
+        network.re_distribute_flow()
+        network.force_direction(only_without_flow=True)
+        network.re_distribute_flow()
+
     network.save_network_values()
     log.info("Save redirecting flow result (update) to database ")
 

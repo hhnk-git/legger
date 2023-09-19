@@ -481,7 +481,7 @@ class Network(object):
         return self._graph
 
     def force_direction(self, mode=Definitions.DEBIET_3DI, do_reverse=True, ignore_manual_startnodes=False,
-                        start_min_category=1):
+                        start_min_category=1, only_without_flow=False):
         # line_nr, weight, freeze
         tree = [[None, float("inf"), False, n.min_category] for n in self.graph.nodes]
 
@@ -500,6 +500,8 @@ class Network(object):
         while len(queue) > 0:
             node, tot_weight = queue.pop()
             for line in node.inflow(mode, include_nones=True):
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
 
                 line: Line
                 if line.category == 1:
@@ -527,6 +529,9 @@ class Network(object):
             node, tot_weight = queue.pop()
             for line in node.outgoing():
                 line: Line
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
+
                 if line.category == 1:
                     to_node = line.end_node()
                     if tree[to_node.nr][2]:
@@ -546,6 +551,8 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
                 if line.category == 1:
                     to_node = line.start_node()
                     if tree[to_node.nr][2]:
@@ -577,6 +584,8 @@ class Network(object):
             node, tot_weight = queue.pop()
 
             for line in node.inflow(mode, include_nones=True):
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
                 line: Line
                 to_node = line.inflow_node(mode)
                 if tree[to_node.nr][2]:
@@ -614,6 +623,8 @@ class Network(object):
             node, tot_weight = queue.pop()
 
             for line in node.outgoing():
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
                 line: Line
                 to_node = line.end_node()
                 if tree[to_node.nr][2]:
@@ -639,6 +650,9 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
+
                 to_node = line.start_node()
                 if tree[to_node.nr][2]:
                     # freezed, so skip
@@ -665,6 +679,9 @@ class Network(object):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
 
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
+
                 line.extra_data['weight'] = weight
                 if line.inflow_node(mode).nr != node_nr:
                     if line.debiet(mode) is None or line.debiet(mode) > 0:
@@ -673,6 +690,9 @@ class Network(object):
                     line.forced_direction = True
 
         for line in self.graph.lines:
+            if only_without_flow and line.debiet_modified is not None:
+                continue
+
             if line.extra_data.get('weight') is None:
                 weight_inflow = tree[line.inflow_node(mode).nr][1]
                 weight_outflow = tree[line.outflow_node(mode).nr][1]
@@ -704,6 +724,8 @@ class Network(object):
 
             for line in node.outgoing():
                 line: Line
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
                 to_node = line.end_node()
                 if tree[to_node.nr][2]:
                     # freezed, so skip
@@ -728,6 +750,8 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
                 to_node = line.start_node()
                 if tree[to_node.nr][2]:
                     # freezed, so skip
@@ -753,6 +777,8 @@ class Network(object):
         for node_nr, [line_nr, weight, _, _] in enumerate(tree):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
+                if only_without_flow and line.debiet_modified is not None:
+                    continue
 
                 line.extra_data['weight'] = weight
                 if line.inflow_node(mode).nr != node_nr:
@@ -762,6 +788,8 @@ class Network(object):
                     line.forced_direction = True
 
         for line in self.graph.lines:
+            if only_without_flow and line.debiet_modified is not None:
+                continue
             if line.extra_data.get('weight') is None:
                 weight_inflow = tree[line.inflow_node(mode).nr][1]
                 weight_outflow = tree[line.outflow_node(mode).nr][1]
