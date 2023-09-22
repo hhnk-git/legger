@@ -55,9 +55,15 @@ class Line(Definitions):
         self.reversed = False
         self.forced_direction = False
 
+        # ignore to only redirect flow for part
+        self.ignore = False
+
         self.extra_data = {
             **extra
         }
+
+    def __str__(self):
+        return f'{self.startnode_id} - {self.endnode_id}'
 
     def start_node(self):
         return self.graph.node(self.startnode_nr)
@@ -152,6 +158,9 @@ class Node(Definitions):
 
         self.incoming_nrs = []
         self.outgoing_nrs = []
+
+    def __str__(self):
+        return f'{self.id}'
 
     def incoming(self):
         return [self.graph.line(nr) for nr in self.incoming_nrs]
@@ -284,6 +293,15 @@ class Graph(Definitions):
         for node in self.nodes:
             if len(node.inflow(modus)) == 0:
                 end_nodes.append(node)
+        return end_nodes
+
+    def get_endnodes_of_unknown(self, modus=Definitions.DEBIET_3DI) -> List[Node]:
+        end_nodes = []
+        for node in self.nodes:
+            if any([l.debiet_modified is None for l in node.outflow(modus)]):
+                if len(node.inflow(modus)) == 0 or all(
+                        [l.debiet_modified is not None for l in node.inflow(modus)]):
+                    end_nodes.append(node)
         return end_nodes
 
 
@@ -493,14 +511,26 @@ class Network(object):
         primary_start_nodes = [n[:2] for n in all_start_nodes
                                if n[2] <= start_min_category]
 
+        # freeze all start points
+        for node, tot_weight, min_cat in all_start_nodes:
+            tree[node.nr][0] = -1
+            tree[node.nr][1] = tot_weight
+            tree[node.nr][2] = True
+            tree[node.nr][3] = min_cat
+
         queue = primary_start_nodes
+
+        if only_without_flow:
+            for line in self.graph.lines:
+                if line.debiet_modified is not None:
+                    line.ignore = True
 
         # first see what can be reached using the current directions or in case of None values be walking over these
         # primary weight is length and in case of none debiet 2x length
         while len(queue) > 0:
             node, tot_weight = queue.pop()
             for line in node.inflow(mode, include_nones=True):
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
 
                 line: Line
@@ -529,7 +559,7 @@ class Network(object):
             node, tot_weight = queue.pop()
             for line in node.outgoing():
                 line: Line
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
 
                 if line.category == 1:
@@ -551,7 +581,7 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
                 if line.category == 1:
                     to_node = line.start_node()
@@ -584,7 +614,7 @@ class Network(object):
             node, tot_weight = queue.pop()
 
             for line in node.inflow(mode, include_nones=True):
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
                 line: Line
                 to_node = line.inflow_node(mode)
@@ -623,7 +653,7 @@ class Network(object):
             node, tot_weight = queue.pop()
 
             for line in node.outgoing():
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
                 line: Line
                 to_node = line.end_node()
@@ -650,7 +680,7 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
 
                 to_node = line.start_node()
@@ -679,7 +709,7 @@ class Network(object):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
 
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
 
                 line.extra_data['weight'] = weight
@@ -690,7 +720,7 @@ class Network(object):
                     line.forced_direction = True
 
         for line in self.graph.lines:
-            if only_without_flow and line.debiet_modified is not None:
+            if line.ignore:
                 continue
 
             if line.extra_data.get('weight') is None:
@@ -724,7 +754,7 @@ class Network(object):
 
             for line in node.outgoing():
                 line: Line
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
                 to_node = line.end_node()
                 if tree[to_node.nr][2]:
@@ -750,7 +780,7 @@ class Network(object):
 
             for line in node.incoming():
                 line: Line
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
                 to_node = line.start_node()
                 if tree[to_node.nr][2]:
@@ -777,7 +807,7 @@ class Network(object):
         for node_nr, [line_nr, weight, _, _] in enumerate(tree):
             if line_nr is not None:
                 line = self.graph.line(line_nr)
-                if only_without_flow and line.debiet_modified is not None:
+                if line.ignore:
                     continue
 
                 line.extra_data['weight'] = weight
@@ -788,7 +818,7 @@ class Network(object):
                     line.forced_direction = True
 
         for line in self.graph.lines:
-            if only_without_flow and line.debiet_modified is not None:
+            if line.ignore:
                 continue
             if line.extra_data.get('weight') is None:
                 weight_inflow = tree[line.inflow_node(mode).nr][1]
@@ -808,24 +838,24 @@ class Network(object):
 
         return tree
 
-    def re_distribute_flow(self):
+    def re_distribute_flow(self, attempt=0):
 
         node_done = [False for i in self.graph.nodes]
 
         # set initial vertex_queue on points with no upstream vertexes
-        node_queue = OrderedDict([(node.id, node) for node in self.graph.get_endnodes(modus=Definitions.FORCED)])
+        node_queue = [node for node in self.graph.get_endnodes_of_unknown(modus=Definitions.FORCED)]
         # remove duplicates
 
         if node_queue is None or len(node_queue) == 0:
             raise Exception('lijst met eindpunten is leeg?!.')
             # return False, []
 
-        last_node = list(node_queue.values())[-1]
+        last_node = node_queue[-1]
 
         c_last_repeated = 0
 
         while len(node_queue) > 0:
-            node = node_queue.popitem(last=False)[1]
+            node = node_queue.pop(0)
             # if node == last_added_node:
             #     break
 
@@ -836,7 +866,7 @@ class Network(object):
                 # end, ready
                 node_done[node.nr] = True
                 if len(node_queue) > 0:
-                    last_node = [*node_queue.values()][-1]
+                    last_node = node_queue[-1]
             else:
                 all_inflows_not_known = len(
                     [l for l in node.inflow(modus=Definitions.FORCED) if l.debiet_modified is None])
@@ -913,18 +943,18 @@ class Network(object):
                     for line in primary_out + other_out:
                         add_node = line.outflow_node(modus=Definitions.FORCED)
                         if not node_done[add_node.nr]:
-                            node_queue[add_node.id] = add_node
+                            node_queue.append(add_node)
 
                     if len(node_queue) > 0:
-                        last_node = [*node_queue.values()][-1]
+                        last_node = node_queue[-1]
                         c_last_repeated = 0
                 else:
                     # wait with this node. add it to the end of the stack.
-                    node_queue[node.id] = node
+                    node_queue.append(node)
 
                     # at this moment nothing has processed last loop
                     if node == last_node:
-                        print(node.nr)
+                        print(node.id)
                         category = 3
                         all_category = 3
                         if c_last_repeated >= 4:
@@ -936,7 +966,7 @@ class Network(object):
                         if c_last_repeated >= 10:
                             all_category = 1
 
-                        for node in [*node_queue.values()]:
+                        for node in node_queue:
                             # for circulars set tree end parts in current endnode list to minflow
                             for line in node.inflow(modus=Definitions.FORCED):
                                 if line.extra_data.get('tree_end') and \
@@ -956,9 +986,10 @@ class Network(object):
                                     # line.debiet_3di if line.debiet_3di is not None else min_flow, 0)
                                     add_node = line.outflow_node(modus=Definitions.FORCED)
                                     if not node_done[add_node.nr]:
-                                        node_queue[add_node.id] = add_node
+                                        node_queue.append(add_node)
+                            node_queue = list(set(node_queue))
                             if len(node_queue) > 0:
-                                last_node = [*node_queue.values()][-1]
+                                last_node = node_queue[-1]
 
                         c_last_repeated += 1
                         if c_last_repeated > 12:

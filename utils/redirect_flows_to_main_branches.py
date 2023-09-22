@@ -1,40 +1,29 @@
-# todo:
-#  - debiet koppeling op 'duiker' flowlines. werkt nu alleen op channels. Bijvoorbeeld hydroobject OAF-W-708 met flowline 2279
-#  - korte zijslootjes worden nu gekoppeld op hoofdwatergangen. in koppelingscriteria iets van de lengte van de watergang meenemen
-
-
 import logging
 
-from legger.sql_models.legger_views import create_legger_views
-# from legger.sql_models.legger_database import LeggerDatabase
-# from legger.sql_models.legger_database import load_spatialite
-# from legger.sql_models.legger_views import create_legger_views
-# from legger.utils.legger_map_manager import LeggerMapManager
-# from legger.utils.redirect_flows_to_main_branches_calculation import redirect_flow_calculation
-from legger.utils.network import Network, load_spatialite
+try:
+    from legger.sql_models.legger_views import create_legger_views
+    from legger.utils.network import Network, load_spatialite
+except ImportError:
+    import sys, os
+
+    sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
+
+    from legger.sql_models.legger_views import create_legger_views
+    from legger.utils.network import Network, load_spatialite
 
 log = logging.getLogger(__name__)
 
 
-# suggestions for improvement:
-# - limit max_link_distance related to length of line (no somtimes small lines at end and
-#   begin point link.
-
-
-def redirect_flows(iface, path_legger_db, change_flow_direction=True):
+def redirect_flows(path_legger_db, change_flow_direction=True):
     network = Network(path_legger_db)
     network.build_graph_tables()
     if change_flow_direction:
         network.force_direction()
         network.re_distribute_flow()
     else:
-        network.re_distribute_flow()
+        network.re_distribute_flow(attempt=1)
         network.force_direction(only_without_flow=True)
-        network.re_distribute_flow()
-        network.force_direction(only_without_flow=True)
-        network.re_distribute_flow()
-        network.force_direction(only_without_flow=True)
-        network.re_distribute_flow()
+        network.re_distribute_flow(attempt=2)
 
     network.save_network_values()
     log.info("Save redirecting flow result (update) to database ")
@@ -61,3 +50,17 @@ def redirect_flows(iface, path_legger_db, change_flow_direction=True):
     #
     # log.info("Save redirecting flow result (update) to database ")
     # con_legger.commit()
+
+
+if __name__ == '__main__':
+    import sys
+    import os
+
+    os.environ["PROJ_LIB"] = "/Applications/QGIS-LTR.app/Contents/Resources/proj"
+    os.environ["GDAL_DATA"] = "/Applications/QGIS-LTR.app/Contents/Resources/gdal"
+    sys.path.append('/Users/bastiaanroos/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins')
+
+    redirect_flows(
+        '//Users/bastiaanroos/Documents/testdata/leggertool/legger_westerkogge2.sqlite',
+        change_flow_direction=False
+    )

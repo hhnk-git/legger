@@ -232,7 +232,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
     def execute_redirect_flows(self):
         change_flow_direction = self.change_flow_direction_checkbox.isChecked()
-        redirect_flows(self.iface, self.polder_datasource, change_flow_direction=change_flow_direction)
+        redirect_flows(self.polder_datasource, change_flow_direction=change_flow_direction)
         self.feedbacktext.setText("Debieten zijn aangepast.")
 
     def explain_step2(self):
