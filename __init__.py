@@ -1,34 +1,49 @@
 import logging
 import os
 import sys
+from pathlib import Path
+
+OUR_DIR = Path(__file__).parent
+
+EXTERNAL_DEPENDENCY_DIR = OUR_DIR / "external"
+THREEDI_DEPENDENCY_DIR = OUR_DIR.parent / "ThreeDiToolbox" / "deps"
+
 
 log = logging.getLogger('legger')
 log.setLevel(logging.DEBUG)
 
+def _update_path(directories):
+    """update path with directories."""
+    for dir_path in directories:
+        dir_path = Path(dir_path)
+        if dir_path.exists():
+            if str(dir_path) not in sys.path:
+                sys.path.append(str(dir_path))
+                log.info(f"{dir_path} added to sys.path")
+        else:
+            log.warning(
+                f"{dir_path} does not exist and is not added to sys.path"
+                )
+
+_update_path([THREEDI_DEPENDENCY_DIR])
 
 try:
     import pyqtgraph
 except ImportError:
     log.info('no installation of pyqtgraph found, use one in external folder')
-    sys.path.append(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), 'external', 'pyqtgraph')
-    )
+    _update_path([EXTERNAL_DEPENDENCY_DIR])
 
 try:
     import sqlalchemy
 except ImportError:
     log.info('no installation of sqlalchemy found, use one in external folder')
-    sys.path.append(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), 'external', 'sqlalchemy')
-    )
+    _update_path([EXTERNAL_DEPENDENCY_DIR])
 
 try:
-    import geoalchemy2
+    import geoalchemy2    
 except ImportError:
     log.info('no installation of geoalchemy2 found, use one in external folder')
-    sys.path.append(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), 'external', 'geoalchemy2')
-    )
+    _update_path([EXTERNAL_DEPENDENCY_DIR])
 
 
 # try:
