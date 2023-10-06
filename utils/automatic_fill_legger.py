@@ -151,7 +151,6 @@ class AutomaticFillLegger(object):
             else:
                 option['verhang_inlaat'] = None
 
-
         self._db_cursor.executemany("""
                 INSERT INTO varianten (
                 id,
@@ -309,6 +308,19 @@ class AutomaticFillLegger(object):
                     if (float(option.get("lwbreedte")) <= profiel_breedte
                             and float(option.get("ldiepte")) <= profiel_diepte
                     ):
+                        found = True
+                        hydrovak_selected[code].append({
+                            'option': option,
+                            'hydrovak': hydrovak,
+                            'gradient_inlaat_ok': (not option.get("verhang_inlaat")
+                                                   or float(option.get("verhang_inlaat")) <= gradient_norm)
+                        })
+            # als niet gevonden, dan alleen op breedte voor hydrovakken met een oppervlak kleiner dan 25 ha (0.042 m3/s)
+            if not found and profiel_breedte is not None and debiet <= 0.042 and debiet_inlaat <= 0.042:
+                gradient_norm = get_gradient_norm(grondsoort)
+                for option in varianten:
+                    if (float(option.get("lwbreedte")) <= profiel_breedte):
+                        found = True
                         hydrovak_selected[code].append({
                             'option': option,
                             'hydrovak': hydrovak,
@@ -319,24 +331,15 @@ class AutomaticFillLegger(object):
         # netwerk analyses om meerdere opties te toetsen op diepte.
         # voor nu de eerste optie
         for key, items in hydrovak_selected.items():
-
             valid_items = [item for item in items if item.get('gradient_inlaat_ok')]
-
             if len(valid_items):
                 selected = items[0]
             else:
                 selected = None
-
             hydrovak_selected[key] = selected
 
         # wegschrijven
         self.save_to_database(hydrovak_selected)
-
-        # extra kolommen
-
-        # a. get Varianten
-
-        # b. get or update GeselecteerdeProfielen
 
     def get_profile_options(self, debiet, grondsoort):
         prof_table = self.get_table()
