@@ -315,16 +315,16 @@ class CreateLeggerSpatialite(object):
                                     ),
                         score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
                         """))
+        
+        session.execute(text("""
+            UPDATE hydroobject
+            SET debiet_3di = debiet_fme * richting_fme   
+            WHERE debiet_3di IS NULL
+                        """))
 
         session.execute(text("""
             UPDATE hydroobject
             SET debiet = debiet_3di
-                        """))
-        
-        session.execute(text("""
-            UPDATE hydroobject
-            SET debiet = debiet_fme * richting_fme
-            WHERE debiet_3di IS NULL
                         """))
         
 

@@ -35,7 +35,7 @@ def create_legger_views(session: sqlite3.Connection):
                 geselecteerd_verhang,
                 geselecteerd_verhang_inlaat,
                 geselecteerd_afvoer_leidend,
-                ws_soort_vak,
+                k.soort_vak,
                 h.opmerkingen,
                 h.kijkp_breedte,
                 h.kijkp_diepte,
