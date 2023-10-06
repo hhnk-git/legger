@@ -320,6 +320,13 @@ class CreateLeggerSpatialite(object):
             UPDATE hydroobject
             SET debiet = debiet_3di
                         """))
+        
+        session.execute(text("""
+            UPDATE hydroobject
+            SET debiet = debiet_fme * richting_fme
+            WHERE debiet_3di IS NULL
+                        """))
+        
 
         session.execute(text("""
             WITH 
