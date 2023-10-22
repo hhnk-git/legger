@@ -106,6 +106,7 @@ class HydroObject(Base):
                                    ForeignKey(BegroeiingsVariant.__tablename__ + ".id"),
                                    index=True)
     opmerkingen = Column(String())
+
     eindpunt_potentieel = Column(Boolean)
     eindpunt_geselecteerd = Column(Boolean)
     geforceerd_omgedraaid = Column(Boolean)
@@ -233,6 +234,7 @@ class Kenmerken(Base):
     taludvoorkeur = Column(Float)
     steilste_talud = Column(Float)
     grondsoort = Column(String(50))
+    soort_vak = Column(Integer)
     bron_grondsoort = Column(String(50))
     hydro_id = Column(Integer,
                       ForeignKey(HydroObject.__tablename__ + ".id"),

@@ -169,6 +169,7 @@ class CreateLeggerSpatialite(object):
             taludvoorkeur,
             steilste_talud,
             grondsoort,
+            soort_vak,
             hydro_id)
         SELECT 
             hydroobject_id as id,
@@ -179,12 +180,24 @@ class CreateLeggerSpatialite(object):
             taludvoorkeur as talud_voorkeur,
             min(ws_talud_links, ws_talud_rechts) as steilste_talud,
             CASE WHEN grondsoort IS NULL THEN 'Onbekend' ELSE grondsoort END as grondsoort,
+            ws_soort_vak,
             hydroobject_id as hydro_id
           FROM imp_hydroobject
         """))
 
         session.execute(text("""
-        INSERT INTO hydroobject  (id, code, categorieoppwaterlichaam, streefpeil, zomerpeil, debiet_inlaat, debiet_fme, richting_fme, geometry, debiet_opgelegd)
+        INSERT INTO hydroobject  (
+            id, 
+            code, 
+            categorieoppwaterlichaam, 
+            streefpeil, 
+            zomerpeil, 
+            debiet_inlaat, 
+            debiet_opgelegd,
+            debiet_fme,  
+            richting_fme, 
+            eindpunt_geselecteerd,
+            geometry)
         SELECT 
             hydroobject_id as id,
             code,
@@ -192,10 +205,11 @@ class CreateLeggerSpatialite(object):
             winterpeil as streefpeil,
             zomerpeil,
             debiet_aanvoer,
+            debiet_opgelegd_m3s,
             debiet_afvoer_prof,
             richting,
-            geometry,
-            NULL             
+            CASE WHEN eindpunt = 1 THEN TRUE ELSE FALSE END,
+            geometry            
         FROM imp_hydroobject
         """))
 
@@ -301,11 +315,18 @@ class CreateLeggerSpatialite(object):
                                     ),
                         score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
                         """))
+        
+        session.execute(text("""
+            UPDATE hydroobject
+            SET debiet_3di = debiet_fme * richting_fme   
+            WHERE debiet_3di IS NULL
+                        """))
 
         session.execute(text("""
             UPDATE hydroobject
             SET debiet = debiet_3di
                         """))
+        
 
         session.execute(text("""
             WITH 
