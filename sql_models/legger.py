@@ -107,6 +107,8 @@ class HydroObject(Base):
                                    index=True)
     opmerkingen = Column(String())
 
+    duiker_count = Column(Integer)  # aantal duikers op basis van match duikersifonhevel
+
     eindpunt_potentieel = Column(Boolean)
     eindpunt_geselecteerd = Column(Boolean)
     geforceerd_omgedraaid = Column(Boolean)
@@ -234,7 +236,8 @@ class Kenmerken(Base):
     taludvoorkeur = Column(Float)
     steilste_talud = Column(Float)
     grondsoort = Column(String(50))
-    soort_vak = Column(Integer)
+    soort_vak = Column(Integer)  # 3 = kunstwerkvak, 4 = pseudovak
+
     bron_grondsoort = Column(String(50))
     hydro_id = Column(Integer,
                       ForeignKey(HydroObject.__tablename__ + ".id"),
@@ -387,6 +390,10 @@ class DuikerSifonHevel(Base):
     debiet = Column(Float)  # extra
     channel_id = Column(Integer)  # extra
     flowline_id = Column(Integer)  # extra
+
+    hydro_id = Column(Integer,
+                      ForeignKey(HydroObject.__tablename__ + ".id"),
+                      index=True)
 
     def __str__(self):
         return u'DuikerSifonHevel {0}'.format(

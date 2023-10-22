@@ -267,10 +267,8 @@ class AutomaticFillLegger(object):
 
         for hydrovak in hydrovakken:
 
-            selected = {
-                'hydrovak': hydrovak,
-                'selected': None
-            }
+            if hydrovak.get('soort_vak') in (3, 4):
+                continue
 
             hydro_id = hydrovak.get('id')
             code = hydrovak.get('code')

@@ -11,6 +11,7 @@ CHECKBOX_FIELD = 1
 INDICATION_HOVER = 2
 INDICATION_HOVER_FUNCTION = 3
 
+
 class BaseTreeItem(object):
     """
     a python object used to return row/column data, and keep note of
@@ -166,7 +167,8 @@ class BaseTreeModel(QtCore.QAbstractItemModel):
             else:
                 return None
         elif role == Qt.BackgroundRole:
-            return QBrush(Qt.transparent)
+            return QBrush(Qt.red)
+            # return QBrush(Qt.transparent)
         # elif role == QtCore.Qt.DecorationRole and index.column() == 0:
         #     return item.icon()
         elif role == Qt.ToolTipRole:
