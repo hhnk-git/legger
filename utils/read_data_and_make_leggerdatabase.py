@@ -17,6 +17,7 @@ import subprocess
 import sys
 
 from legger.sql_models.legger_database import LeggerDatabase
+from legger.utils.link_duikers_to_hydrovakken import link_duikers_to_hydrovakken
 
 log = logging.getLogger(__name__)
 
@@ -315,7 +316,7 @@ class CreateLeggerSpatialite(object):
                                     ),
                         score = (SELECT m.score FROM matched m WHERE m.hydro_id = id)
                         """))
-        
+
         session.execute(text("""
             UPDATE hydroobject
             SET debiet_3di = debiet_fme * richting_fme   
@@ -326,7 +327,6 @@ class CreateLeggerSpatialite(object):
             UPDATE hydroobject
             SET debiet = debiet_3di
                         """))
-        
 
         session.execute(text("""
             WITH 
@@ -341,7 +341,7 @@ class CreateLeggerSpatialite(object):
             """))
 
         session.commit()
-                
+
         # profielpunten met te weinig punten er uit
         session = self.db.get_session()
         session.execute(text("""
@@ -409,6 +409,8 @@ def main():
     )
 
     legger_class.full_import_ogr2ogr()
+
+    link_duikers_to_hydrovakken(database_path)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import logging
 import os
 import sqlite3
+import typing
 from decimal import Decimal, getcontext
 from math import ceil, sqrt
 
@@ -75,8 +76,8 @@ def calc_pitlo_griffioen(flow, ditch_bottom_width, water_depth, slope, friction_
 
 def calc_hydraulic_radius(ditch_bottom_width, water_depth, slope):
     ditch_circumference = (ditch_bottom_width
-                           + (np.sqrt(water_depth ** 2 + (slope * water_depth) ** 2))
-                           + (np.sqrt(water_depth ** 2 + (slope * water_depth) ** 2)))
+                           + (sqrt(water_depth ** 2 + (slope * water_depth) ** 2))
+                           + (sqrt(water_depth ** 2 + (slope * water_depth) ** 2)))
 
     ditch_cross_section_area = (ditch_bottom_width * water_depth
                                 + (0.5 * (water_depth * slope) * water_depth)
@@ -117,7 +118,7 @@ def calc_manning(normative_flow, ditch_bottom_width, water_depth, slope, frictio
 
 
 def get_depth_list(from_depth, to_depth):
-    out: typeing.list[float] = []
+    out: typing.list[float] = []
     depth = from_depth
 
     while depth <= to_depth:
@@ -330,13 +331,14 @@ def create_variants(legger_db_filepath):
     cursor = conn.cursor()
 
     # Step 1: Read the database
-    cursor.execute(
-        "Select ho.id, km.diepte, (ho.zomerpeil - ho.streefpeil) as zpeil_diff, km.breedte, "
-        "ho.categorieoppwaterlichaam, km.taludvoorkeur, km.grondsoort, "
-        "ST_LENGTH(ST_TRANSFORM(ho.geometry, 28992)) as length, ho.debiet, ho.debiet_inlaat "
-        "from hydroobject ho "
-        "left outer join kenmerken km on ho.id = km.hydro_id")
-    # "where ho.id = 1212"
+    cursor.execute("""
+        Select ho.id, km.diepte, (ho.zomerpeil - ho.streefpeil) as zpeil_diff, km.breedte, 
+        ho.categorieoppwaterlichaam, km.taludvoorkeur, km.grondsoort, 
+        ST_LENGTH(ST_TRANSFORM(ho.geometry, 28992)) as length, ho.debiet, ho.debiet_inlaat 
+        from hydroobject ho 
+        left outer join kenmerken km on ho.id = km.hydro_id 
+        where km.soort_vak is NULL
+        """)
 
     hydro_objects = []
 
@@ -517,8 +519,8 @@ def create_variants(legger_db_filepath):
                                 else:
                                     opmerkingen = ""
                             except Exception as e:
-                                log.error('error bij check gradient %s - %s diepte: %s',
-                                          hydro_object.object_id, water_depth, e)
+                                log.error('error bij check gradient %s - %s hydraulic_depth: %s',
+                                          hydro_object.object_id, hydraulic_depth, e)
                                 opmerkingen = str(e)
 
                             variants_table.append([

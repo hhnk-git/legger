@@ -36,6 +36,7 @@ def create_legger_views(session: sqlite3.Connection):
                 geselecteerd_verhang_inlaat,
                 geselecteerd_afvoer_leidend,
                 k.soort_vak,
+                h.duiker_count,
                 h.opmerkingen,
                 h.kijkp_breedte,
                 h.kijkp_diepte,
@@ -280,7 +281,7 @@ def create_legger_views(session: sqlite3.Connection):
     #         GROUP BY h.id
     #         ORDER BY h.id))) as a
     #         LEFT OUTER JOIN begroeiingsvariant as bv ON bv.id = a.advies_id;
-            
+
     #         --DELETE FROM views_geometry_columns WHERE view_name = 'begroeiingsadvies';
     #         SELECT RecoverGeometryColumn( 'begroeiingsadvies' , 'geometry' , 28992 , 'LINESTRING' );       
     #      """)

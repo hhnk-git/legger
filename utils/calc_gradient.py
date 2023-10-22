@@ -5,26 +5,33 @@ from legger.sql_models.legger_database import load_spatialite, LeggerDatabase
 from legger.utils.legger_map_manager import LeggerMapManager
 from legger.utils.new_network import NewNetwork
 from legger.sql_models.legger_views import create_legger_views
+from legger.utils.link_duikers_to_hydrovakken import link_duikers_to_hydrovakken
 
 log = logging.getLogger(__name__)
 
 
 def calc_and_set_tot_verhang(network, arc, tot_verhang, target_level):
-
     arc_target_level = arc['target_level']
     if target_level != arc_target_level:
         tot_verhang = 0
 
     if tot_verhang is None:
         tot_verhang = None
-    elif arc['verhang'] is None :
+    elif arc['soort_vak'] == 4:  # pseudovak - geen verhang
+        tot_verhang = tot_verhang
+    elif arc['soort_vak'] == 3:  # kunstwerkvak
+        tot_verhang = tot_verhang
+    elif arc['verhang'] is None:
         tot_verhang = tot_verhang
     else:
         verhang = arc['length'] * arc['verhang'] / 100000
         tot_verhang += verhang
 
+    if arc['duiker_count']:
+        # add 1 cm opstuwing voor elke duiker
+        tot_verhang += tot_verhang + arc['duiker_count'] * 0.01
+
     arc['tot_verhang'] = tot_verhang
-    print("{}: {}".format(arc['hydro_id'], arc['tot_verhang']))
 
     for arc_nr in arc['upstream_arcs']:
         new_arc = network.arc_tree[arc_nr]
@@ -32,7 +39,6 @@ def calc_and_set_tot_verhang(network, arc, tot_verhang, target_level):
 
 
 def calc_gradient_for_network(network: NewNetwork):
-
     for start_arc in network.start_arcs:
         arc_nr = start_arc['arc_nr']
         arc = network.arc_tree[arc_nr]
@@ -48,6 +54,8 @@ def calc_gradient(iface, path_legger_db):
         'spatialite'
     )
     db.create_and_check_fields()
+
+    link_duikers_to_hydrovakken(path_legger_db)
 
     con_legger = load_spatialite(path_legger_db)
     create_legger_views(con_legger)
