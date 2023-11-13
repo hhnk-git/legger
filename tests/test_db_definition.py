@@ -14,18 +14,10 @@ class TestReadTdiResults(unittest.TestCase):
         )
 
     def test_with_query(self):
-
-        db = LeggerDatabase(
-            {
-                'db_path': self.legger_db
-            },
-            'spatialite'
-        )
+        db = LeggerDatabase(self.legger_db)
         session = db.get_session()
 
         hydro_object = session.query(HydroObject).filter_by(id=1).first()
         hydro_objects = session.query(HydroObject).filter(HydroObject.id.in_([])).all()
 
         self.assertIsNotNone(hydro_object)
-
-

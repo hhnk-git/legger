@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.event import listen
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
+from sqlalchemy.pool import NullPool
 
 from .legger import Base
 from .sqlalchemy_add_columns import create_and_upgrade
@@ -62,17 +63,12 @@ class LeggerDatabase(object):
         (code is beside link to different 'Base;  equal to ThreediDatabase)
     """
 
-    def __init__(self, connection_settings, db_type="spatialite", echo=False):
+    def __init__(self, path, echo=False):
         """
-
         :param connection_settings:
-        db_type (str choice): database type. 'sqlite' and 'postgresql' are
-                              supported
         """
-        self.settings = connection_settings
-        # make sure within the ThreediDatabase object we always use 'sqlite'
-        # as the db_type identifier
-        self.db_type = db_type
+        self.path = path
+
         self.echo = echo
 
         self._engine = None
@@ -81,15 +77,13 @@ class LeggerDatabase(object):
         self._base_metadata = None
 
     def create_db(self, overwrite=False):
-        if self.db_type == 'spatialite':
+        if overwrite and os.path.isfile(self.path):
+            os.remove(self.path)
 
-            if overwrite and os.path.isfile(self.settings['db_file']):
-                os.remove(self.settings['db_file'])
-
-            drv = ogr.GetDriverByName('SQLite')
-            db = drv.CreateDataSource(self.settings['db_file'],
-                                      ["SPATIALITE=YES"])
-            Base.metadata.create_all(self.engine)
+        drv = ogr.GetDriverByName('SQLite')
+        db = drv.CreateDataSource(self.path,
+                                  ["SPATIALITE=YES"])
+        Base.metadata.create_all(self.engine)
 
     def get_metadata(self, including_existing_tables=False, engine=None):
 
@@ -124,32 +118,25 @@ class LeggerDatabase(object):
     def get_engine(self, get_seperate_engine=False):
 
         if self._engine is None or get_seperate_engine:
-            if self.db_type == "spatialite":
-                engine = create_engine(
-                    "sqlite:///{0}".format(self.settings["db_path"]), echo=self.echo
-                )
-                listen(engine, "connect", load_spatialite_base)
-                if get_seperate_engine:
-                    return engine
-                else:
-                    self._engine = engine
+            if self.path == "":
+                # Special case in-memory SQLite:
+                # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#threading-pooling-behavior
+                poolclass = None
+            else:
+                poolclass = NullPool
 
-            elif self.db_type == "postgres":
-                con = (
-                    "postgresql://{username}:{password}@{host}:"
-                    "{port}/{database}".format(**self.settings)
-                )
-
-                engine = create_engine(con, echo=self.echo)
-                if get_seperate_engine:
-                    return engine
-                else:
-                    self._engine = engine
+            engine = create_engine(
+                "sqlite:///{0}".format(self.path), echo=self.echo, poolclass=poolclass
+            )
+            listen(engine, "connect", load_spatialite_base)
+            if get_seperate_engine:
+                return engine
+            else:
+                self._engine = engine
 
         return self._engine
 
     def get_metadata(self, including_existing_tables=True, engine=None):
-
         if including_existing_tables:
             metadata = copy.deepcopy(Base.metadata)
             if engine is None:
@@ -170,7 +157,6 @@ class LeggerDatabase(object):
         """
         call vacuum on a sqlite DB which reclaims any unused storage space from sqlite
         """
-        if self.db_type == "spatialite":
-            statement = """VACUUM;"""
-            with self.engine.begin() as connection:
-                connection.execute(text(statement))
+        statement = """VACUUM;"""
+        with self.engine.begin() as connection:
+            connection.execute(text(statement))

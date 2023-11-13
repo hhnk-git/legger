@@ -58,10 +58,7 @@ class SetBegroeiingsvariant(QObject):
         try:
             if polder_datasource:
                 self.remove_variant_items()
-                db = LeggerDatabase(
-                    {'db_path': polder_datasource},
-                    'spatialite'
-                )
+                db = LeggerDatabase(polder_datasource)
                 db.create_and_check_fields()
                 self.session = db.get_session()
                 for variant in self.session.query(BegroeiingsVariant):
@@ -70,7 +67,6 @@ class SetBegroeiingsvariant(QObject):
                     action.triggered.connect(callback_factory(variant.id))
         except Exception as e:
             log.warning('not able to get begroeiingsvarianten. Melding: %s', e)
-
 
     def remove_variant_items(self):
 

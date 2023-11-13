@@ -71,7 +71,6 @@ def read_tdi_results(path_model_db, path_result_db,
 
     con_legger = load_spatialite(path_legger_db)
 
-
     if ThreediResult is None:
         raise ImportError('no ThreeDiToolbox plugin')
 
@@ -354,12 +353,7 @@ def read_tdi_results(path_model_db, path_result_db,
 
 
 def write_tdi_results_to_db(hydroobject_results, path_legger_db):
-    db = LeggerDatabase(
-        {
-            'db_path': path_legger_db
-        },
-        'spatialite'
-    )
+    db = LeggerDatabase(path_legger_db)
     # db.create_and_check_fields()
     session = db.get_session()
 
@@ -447,12 +441,7 @@ def read_tdi_culvert_results(path_model_db, path_result_db,
 
 
 def write_tdi_culvert_results_to_db(culvert_results, path_legger_db):
-    db = LeggerDatabase(
-        {
-            'db_path': path_legger_db
-        },
-        'spatialite'
-    )
+    db = LeggerDatabase(path_legger_db)
     db.create_and_check_fields()
     session = db.get_session()
 

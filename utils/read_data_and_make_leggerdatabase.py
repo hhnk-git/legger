@@ -73,13 +73,7 @@ class CreateLeggerSpatialite(object):
                        'Peilgebieden_na_datacheck']
         # tabellen oude methode peilgebieden: 'PeilafwijkingGebied', 'PeilgebiedPraktijk',
 
-        self.db = LeggerDatabase(
-            {
-                'db_file': self.database_path,
-                'db_path': self.database_path  # N&S inconsistent gebruik van  :-O
-            },
-            'spatialite'
-        )
+        self.db = LeggerDatabase(self.database_path)
 
     def full_import_ogr2ogr(self):
 

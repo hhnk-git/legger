@@ -8,7 +8,7 @@ import logging
 import re
 
 import sqlalchemy
-from sqlalchemy import MetaData, Table, exc
+from sqlalchemy import MetaData, Table, exc, text
 
 _new_sa_ddl = sqlalchemy.__version__.startswith('0.7')
 
@@ -46,12 +46,13 @@ def create_and_upgrade(engine, metadata):
                 log.info('Adding column %s.%s' %
                          (model_table.name, model_column.name))
                 assert not model_column.constraints, \
-                    'I cannot automatically add columns with constraints to '\
+                    'I cannot automatically add columns with constraints to ' \
                     'the database. Please consider fixing me if you care!'
                 model_col_spec = ddl_c.get_column_specification(model_column)
                 sql = 'ALTER TABLE %s ADD %s' % (
                     model_table.name, model_col_spec)
-                engine.execute(sql)
+                with engine.connect() as connection:
+                    connection.execute(text(sql))
 
             # It's difficult to reliably determine if the model has changed
             # a column definition. E.g. the default precision of columns

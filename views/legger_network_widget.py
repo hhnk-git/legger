@@ -159,8 +159,7 @@ class LeggerWidget(QDockWidget):
 
         # create session (before setup_ui)
         db = LeggerDatabase(
-            {'db_path': path_legger_db},
-            'spatialite'
+            path_legger_db
         )
         log.warning('starting: create and check fields')
         db.create_and_check_fields()

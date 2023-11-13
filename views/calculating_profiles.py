@@ -157,12 +157,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         returns: None
         """
         # first update legger spatialite according to schema, using sqlAlchemy
-        db = LeggerDatabase(
-            {
-                'db_path': self.polder_datasource
-            },
-            'spatialite'
-        )
+        db = LeggerDatabase(self.polder_datasource)
         # db.create_and_check_fields()
         # do one query, don't know what the reason was for this...
         session = db.get_session()
@@ -258,12 +253,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
     def execute_step2(self):
 
-        db = LeggerDatabase(
-            {
-                'db_path': self.polder_datasource
-            },
-            'spatialite'
-        )
+        db = LeggerDatabase(self.polder_datasource)
         db.create_and_check_fields()
         # do one query, don't know what the reason was for this...
 

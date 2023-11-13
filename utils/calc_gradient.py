@@ -47,12 +47,7 @@ def calc_gradient_for_network(network: NewNetwork):
 
 def calc_gradient(iface, path_legger_db):
     # step 1: get network
-    db = LeggerDatabase(
-        {
-            'db_path': path_legger_db
-        },
-        'spatialite'
-    )
+    db = LeggerDatabase(path_legger_db)
     db.create_and_check_fields()
 
     link_duikers_to_hydrovakken(path_legger_db)
