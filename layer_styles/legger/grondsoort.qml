@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis simplifyMaxScale="1" simplifyDrawingHints="1" styleCategories="AllStyleCategories" maxScale="0" minScale="100000000" readOnly="0" version="3.28.5-Firenze" labelsEnabled="1" symbologyReferenceScale="-1" simplifyDrawingTol="1" simplifyLocal="1" simplifyAlgorithm="0" hasScaleBasedVisibilityFlag="0">
+<qgis simplifyMaxScale="1" simplifyDrawingHints="1" styleCategories="AllStyleCategories" maxScale="0" minScale="100000000" readOnly="0" version="3.28.5-Firenze" labelsEnabled="0" symbologyReferenceScale="-1" simplifyDrawingTol="1" simplifyLocal="1" simplifyAlgorithm="0" hasScaleBasedVisibilityFlag="0">
   <flags>
     <Identifiable>1</Identifiable>
     <Removable>1</Removable>
@@ -41,7 +41,7 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="114,155,111,255"/>
+            <Option name="line_color" type="QString" value="183,72,75,255"/>
             <Option name="line_style" type="QString" value="solid"/>
             <Option name="line_width" type="QString" value="0.6"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
@@ -81,12 +81,12 @@
         <layer class="SimpleFill" enabled="1" locked="0" pass="0">
           <Option type="Map">
             <Option name="border_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-            <Option name="color" type="QString" value="114,155,111,255"/>
+            <Option name="color" type="QString" value="183,72,75,255"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
             <Option name="offset" type="QString" value="0,0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
             <Option name="offset_unit" type="QString" value="MM"/>
-            <Option name="outline_color" type="QString" value="81,111,79,255"/>
+            <Option name="outline_color" type="QString" value="131,51,54,255"/>
             <Option name="outline_style" type="QString" value="solid"/>
             <Option name="outline_width" type="QString" value="0.2"/>
             <Option name="outline_width_unit" type="QString" value="MM"/>
@@ -115,14 +115,14 @@
           <Option type="Map">
             <Option name="angle" type="QString" value="0"/>
             <Option name="cap_style" type="QString" value="square"/>
-            <Option name="color" type="QString" value="114,155,111,255"/>
+            <Option name="color" type="QString" value="183,72,75,255"/>
             <Option name="horizontal_anchor_point" type="QString" value="1"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
             <Option name="name" type="QString" value="diamond"/>
             <Option name="offset" type="QString" value="0,0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
             <Option name="offset_unit" type="QString" value="MM"/>
-            <Option name="outline_color" type="QString" value="81,111,79,255"/>
+            <Option name="outline_color" type="QString" value="131,51,54,255"/>
             <Option name="outline_style" type="QString" value="solid"/>
             <Option name="outline_width" type="QString" value="0.2"/>
             <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -144,14 +144,14 @@
       </symbol>
     </profileMarkerSymbol>
   </elevation>
-  <renderer-v2 attr="to_real( &quot;verhang&quot;  ) " symbollevels="0" referencescale="-1" type="graduatedSymbol" graduatedMethod="GraduatedColor" enableorderby="0" forceraster="0">
-    <ranges>
-      <range symbol="0" upper="2.000000000000000" lower="0.000000000000000" render="true" label="&lt; 2 cm/km"/>
-      <range symbol="1" upper="3.000000000000000" lower="2.000000000000000" render="true" label=" 2 - 3 cm/km"/>
-      <range symbol="2" upper="4.000000000000000" lower="3.000000000000000" render="true" label=" 3 - 4 cm/km"/>
-      <range symbol="3" upper="6.000000000000000" lower="4.000000000000000" render="true" label=" 4 - 6 cm/km"/>
-      <range symbol="4" upper="inf" lower="6.000000000000000" render="true" label="> 6 cm/km"/>
-    </ranges>
+  <renderer-v2 attr="grondsoort" symbollevels="0" referencescale="-1" type="categorizedSymbol" enableorderby="0" forceraster="0">
+    <categories>
+      <category symbol="0" type="string" value="Bebouwing" render="true" label="Bebouwing"/>
+      <category symbol="1" type="string" value="Klei" render="true" label="Klei/Zand"/>
+      <category symbol="2" type="string" value="Veen" render="true" label="Veen"/>
+      <category symbol="3" type="string" value="Onbekend" render="true" label="Onbekend"/>
+      <category symbol="4" type="string" value="" render="true" label="Niet ingevuld"/>
+    </categories>
     <symbols>
       <symbol frame_rate="10" name="0" force_rhr="0" type="line" alpha="1" clip_to_extent="1" is_animated="0">
         <data_defined_properties>
@@ -173,9 +173,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="26,150,65,255"/>
+            <Option name="line_color" type="QString" value="250,32,32,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -220,9 +220,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="14,207,21,255"/>
+            <Option name="line_color" type="QString" value="232,255,0,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -267,9 +267,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="255,204,0,255"/>
+            <Option name="line_color" type="QString" value="149,17,210,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -314,9 +314,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="215,72,24,255"/>
+            <Option name="line_color" type="QString" value="1,255,9,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -361,9 +361,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="180,0,3,255"/>
+            <Option name="line_color" type="QString" value="163,163,163,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -410,9 +410,9 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="26,150,65,255"/>
+            <Option name="line_color" type="QString" value="231,113,72,255"/>
             <Option name="line_style" type="QString" value="solid"/>
-            <Option name="line_width" type="QString" value="0.66"/>
+            <Option name="line_width" type="QString" value="2.66"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
             <Option name="offset" type="QString" value="0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
@@ -438,164 +438,24 @@
         </layer>
       </symbol>
     </source-symbol>
-    <colorramp name="[source]" type="gradient">
-      <Option type="Map">
-        <Option name="color1" type="QString" value="215,25,28,255"/>
-        <Option name="color2" type="QString" value="26,150,65,255"/>
-        <Option name="direction" type="QString" value="ccw"/>
-        <Option name="discrete" type="QString" value="0"/>
-        <Option name="rampType" type="QString" value="gradient"/>
-        <Option name="spec" type="QString" value="rgb"/>
-        <Option name="stops" type="QString" value="0.25;253,174,97,255;rgb;ccw:0.5;255,255,192,255;rgb;ccw:0.75;166,217,106,255;rgb;ccw"/>
-      </Option>
-    </colorramp>
-    <classificationMethod id="EqualInterval">
-      <symmetricMode symmetrypoint="0" astride="0" enabled="0"/>
-      <labelFormat format="%1 - %2" labelprecision="4" trimtrailingzeroes="1"/>
-      <parameters>
-        <Option/>
-      </parameters>
-      <extraInformation/>
-    </classificationMethod>
     <rotation/>
     <sizescale/>
   </renderer-v2>
-  <labeling type="simple">
-    <settings calloutType="simple">
-      <text-style fontSizeUnit="Point" fontUnderline="0" fontLetterSpacing="0" fontSizeMapUnitScale="3x:0,0,0,0,0,0" useSubstitutions="0" textOrientation="horizontal" textColor="0,0,0,255" fontSize="7.25" textOpacity="1" capitalization="0" namedStyle="Standaard" fontWeight="50" multilineHeightUnit="Percentage" fontFamily="MS Shell Dlg 2" previewBkgrdColor="255,255,255,255" fontItalic="0" multilineHeight="1" legendString="Aa" fontWordSpacing="0" fontKerning="1" blendMode="0" allowHtml="0" fieldName="COALESCE('gekozen op: '  ||  left(&quot;geselecteerd_op&quot;,16),'\n'  || &#xd;&#xa;'opmerking: ' ||  &quot;profiel_opmerking&quot;  ||  '\n'  )" fontStrikeout="0" isExpression="1" forcedBold="0" forcedItalic="0">
-        <families/>
-        <text-buffer bufferColor="255,247,219,255" bufferNoFill="0" bufferDraw="0" bufferJoinStyle="64" bufferSize="1" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferSizeUnits="MM" bufferOpacity="1" bufferBlendMode="0"/>
-        <text-mask maskSizeMapUnitScale="3x:0,0,0,0,0,0" maskOpacity="1" maskType="0" maskSize="0" maskedSymbolLayers="" maskSizeUnits="MM" maskEnabled="0" maskJoinStyle="128"/>
-        <background shapeDraw="1" shapeRadiiX="0" shapeSizeY="0.10000000000000001" shapeBorderWidthMapUnitScale="3x:0,0,0,0,0,0" shapeFillColor="255,255,255,255" shapeBorderColor="0,0,0,255" shapeBlendMode="0" shapeRadiiY="0" shapeSVGFile="" shapeOffsetY="0" shapeOpacity="1" shapeBorderWidth="0.10000000000000001" shapeRotation="0" shapeType="0" shapeSizeType="0" shapeOffsetMapUnitScale="3x:0,0,0,0,0,0" shapeSizeMapUnitScale="3x:0,0,0,0,0,0" shapeSizeUnit="MM" shapeBorderWidthUnit="MM" shapeSizeX="0.10000000000000001" shapeRadiiUnit="MM" shapeOffsetUnit="MM" shapeJoinStyle="64" shapeOffsetX="0" shapeRadiiMapUnitScale="3x:0,0,0,0,0,0" shapeRotationType="0">
-          <symbol frame_rate="10" name="markerSymbol" force_rhr="0" type="marker" alpha="1" clip_to_extent="1" is_animated="0">
-            <data_defined_properties>
-              <Option type="Map">
-                <Option name="name" type="QString" value=""/>
-                <Option name="properties"/>
-                <Option name="type" type="QString" value="collection"/>
-              </Option>
-            </data_defined_properties>
-            <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
-              <Option type="Map">
-                <Option name="angle" type="QString" value="0"/>
-                <Option name="cap_style" type="QString" value="square"/>
-                <Option name="color" type="QString" value="225,89,137,255"/>
-                <Option name="horizontal_anchor_point" type="QString" value="1"/>
-                <Option name="joinstyle" type="QString" value="bevel"/>
-                <Option name="name" type="QString" value="circle"/>
-                <Option name="offset" type="QString" value="0,0"/>
-                <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-                <Option name="offset_unit" type="QString" value="MM"/>
-                <Option name="outline_color" type="QString" value="35,35,35,255"/>
-                <Option name="outline_style" type="QString" value="solid"/>
-                <Option name="outline_width" type="QString" value="0"/>
-                <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-                <Option name="outline_width_unit" type="QString" value="MM"/>
-                <Option name="scale_method" type="QString" value="diameter"/>
-                <Option name="size" type="QString" value="2"/>
-                <Option name="size_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-                <Option name="size_unit" type="QString" value="MM"/>
-                <Option name="vertical_anchor_point" type="QString" value="1"/>
-              </Option>
-              <data_defined_properties>
-                <Option type="Map">
-                  <Option name="name" type="QString" value=""/>
-                  <Option name="properties"/>
-                  <Option name="type" type="QString" value="collection"/>
-                </Option>
-              </data_defined_properties>
-            </layer>
-          </symbol>
-          <symbol frame_rate="10" name="fillSymbol" force_rhr="0" type="fill" alpha="1" clip_to_extent="1" is_animated="0">
-            <data_defined_properties>
-              <Option type="Map">
-                <Option name="name" type="QString" value=""/>
-                <Option name="properties"/>
-                <Option name="type" type="QString" value="collection"/>
-              </Option>
-            </data_defined_properties>
-            <layer class="SimpleFill" enabled="1" locked="0" pass="0">
-              <Option type="Map">
-                <Option name="border_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-                <Option name="color" type="QString" value="255,255,255,255"/>
-                <Option name="joinstyle" type="QString" value="miter"/>
-                <Option name="offset" type="QString" value="0,0"/>
-                <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-                <Option name="offset_unit" type="QString" value="MM"/>
-                <Option name="outline_color" type="QString" value="0,0,0,255"/>
-                <Option name="outline_style" type="QString" value="solid"/>
-                <Option name="outline_width" type="QString" value="0.1"/>
-                <Option name="outline_width_unit" type="QString" value="MM"/>
-                <Option name="style" type="QString" value="solid"/>
-              </Option>
-              <data_defined_properties>
-                <Option type="Map">
-                  <Option name="name" type="QString" value=""/>
-                  <Option name="properties"/>
-                  <Option name="type" type="QString" value="collection"/>
-                </Option>
-              </data_defined_properties>
-            </layer>
-          </symbol>
-        </background>
-        <shadow shadowDraw="0" shadowUnder="0" shadowScale="100" shadowOffsetUnit="MM" shadowRadiusMapUnitScale="3x:0,0,0,0,0,0" shadowOffsetGlobal="1" shadowBlendMode="6" shadowOffsetMapUnitScale="3x:0,0,0,0,0,0" shadowRadiusAlphaOnly="0" shadowRadiusUnit="MM" shadowRadius="1.5" shadowColor="0,0,0,255" shadowOffsetDist="1" shadowOffsetAngle="135" shadowOpacity="0.69999999999999996"/>
-        <dd_properties>
-          <Option type="Map">
-            <Option name="name" type="QString" value=""/>
-            <Option name="properties"/>
-            <Option name="type" type="QString" value="collection"/>
-          </Option>
-        </dd_properties>
-        <substitutions/>
-      </text-style>
-      <text-format plussign="0" autoWrapLength="0" addDirectionSymbol="0" rightDirectionSymbol=">" decimals="3" reverseDirectionSymbol="0" wrapChar="" leftDirectionSymbol="&lt;" useMaxLineLengthForAutoWrap="1" multilineAlign="0" placeDirectionSymbol="0" formatNumbers="0"/>
-      <placement overrunDistanceUnit="MM" lineAnchorType="0" centroidWhole="0" priority="5" overrunDistance="0" distMapUnitScale="3x:0,0,0,0,0,0" maxCurvedCharAngleOut="-20" layerType="LineGeometry" repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" offsetType="0" lineAnchorClipping="0" allowDegraded="0" overlapHandling="PreventOverlap" repeatDistance="0" offsetUnits="MapUnit" preserveRotation="1" overrunDistanceMapUnitScale="3x:0,0,0,0,0,0" centroidInside="0" repeatDistanceUnits="MM" fitInPolygonOnly="0" distUnits="MM" polygonPlacementFlags="2" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR" rotationUnit="AngleDegrees" geometryGeneratorEnabled="0" xOffset="0" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" lineAnchorTextPoint="CenterOfText" quadOffset="4" rotationAngle="0" dist="0" maxCurvedCharAngleIn="20" placementFlags="10" geometryGeneratorType="PointGeometry" geometryGenerator="" lineAnchorPercent="0.5" yOffset="0" placement="4"/>
-      <rendering obstacleFactor="1" scaleVisibility="1" minFeatureSize="0" drawLabels="1" zIndex="0" obstacle="1" fontMaxPixelSize="10000" scaleMax="2000" unplacedVisibility="0" fontLimitPixelSize="0" upsidedownLabels="0" maxNumLabels="2000" labelPerPart="0" obstacleType="0" scaleMin="1" fontMinPixelSize="3" mergeLines="0" limitNumLabels="0"/>
-      <dd_properties>
-        <Option type="Map">
-          <Option name="name" type="QString" value=""/>
-          <Option name="properties"/>
-          <Option name="type" type="QString" value="collection"/>
-        </Option>
-      </dd_properties>
-      <callout type="simple">
-        <Option type="Map">
-          <Option name="anchorPoint" type="QString" value="pole_of_inaccessibility"/>
-          <Option name="blendMode" type="int" value="0"/>
-          <Option name="ddProperties" type="Map">
-            <Option name="name" type="QString" value=""/>
-            <Option name="properties"/>
-            <Option name="type" type="QString" value="collection"/>
-          </Option>
-          <Option name="drawToAllParts" type="bool" value="false"/>
-          <Option name="enabled" type="QString" value="0"/>
-          <Option name="labelAnchorPoint" type="QString" value="point_on_exterior"/>
-          <Option name="lineSymbol" type="QString" value="&lt;symbol frame_rate=&quot;10&quot; name=&quot;symbol&quot; force_rhr=&quot;0&quot; type=&quot;line&quot; alpha=&quot;1&quot; clip_to_extent=&quot;1&quot; is_animated=&quot;0&quot;>&lt;data_defined_properties>&lt;Option type=&quot;Map&quot;>&lt;Option name=&quot;name&quot; type=&quot;QString&quot; value=&quot;&quot;/>&lt;Option name=&quot;properties&quot;/>&lt;Option name=&quot;type&quot; type=&quot;QString&quot; value=&quot;collection&quot;/>&lt;/Option>&lt;/data_defined_properties>&lt;layer class=&quot;SimpleLine&quot; enabled=&quot;1&quot; locked=&quot;0&quot; pass=&quot;0&quot;>&lt;Option type=&quot;Map&quot;>&lt;Option name=&quot;align_dash_pattern&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;capstyle&quot; type=&quot;QString&quot; value=&quot;square&quot;/>&lt;Option name=&quot;customdash&quot; type=&quot;QString&quot; value=&quot;5;2&quot;/>&lt;Option name=&quot;customdash_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;Option name=&quot;customdash_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;dash_pattern_offset&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;dash_pattern_offset_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;Option name=&quot;dash_pattern_offset_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;draw_inside_polygon&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;joinstyle&quot; type=&quot;QString&quot; value=&quot;bevel&quot;/>&lt;Option name=&quot;line_color&quot; type=&quot;QString&quot; value=&quot;60,60,60,255&quot;/>&lt;Option name=&quot;line_style&quot; type=&quot;QString&quot; value=&quot;solid&quot;/>&lt;Option name=&quot;line_width&quot; type=&quot;QString&quot; value=&quot;0.3&quot;/>&lt;Option name=&quot;line_width_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;offset&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;offset_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;Option name=&quot;offset_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;ring_filter&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;trim_distance_end&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;trim_distance_end_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;Option name=&quot;trim_distance_end_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;trim_distance_start&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;trim_distance_start_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;Option name=&quot;trim_distance_start_unit&quot; type=&quot;QString&quot; value=&quot;MM&quot;/>&lt;Option name=&quot;tweak_dash_pattern_on_corners&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;use_custom_dash&quot; type=&quot;QString&quot; value=&quot;0&quot;/>&lt;Option name=&quot;width_map_unit_scale&quot; type=&quot;QString&quot; value=&quot;3x:0,0,0,0,0,0&quot;/>&lt;/Option>&lt;data_defined_properties>&lt;Option type=&quot;Map&quot;>&lt;Option name=&quot;name&quot; type=&quot;QString&quot; value=&quot;&quot;/>&lt;Option name=&quot;properties&quot;/>&lt;Option name=&quot;type&quot; type=&quot;QString&quot; value=&quot;collection&quot;/>&lt;/Option>&lt;/data_defined_properties>&lt;/layer>&lt;/symbol>"/>
-          <Option name="minLength" type="double" value="0"/>
-          <Option name="minLengthMapUnitScale" type="QString" value="3x:0,0,0,0,0,0"/>
-          <Option name="minLengthUnit" type="QString" value="MM"/>
-          <Option name="offsetFromAnchor" type="double" value="0"/>
-          <Option name="offsetFromAnchorMapUnitScale" type="QString" value="3x:0,0,0,0,0,0"/>
-          <Option name="offsetFromAnchorUnit" type="QString" value="MM"/>
-          <Option name="offsetFromLabel" type="double" value="0"/>
-          <Option name="offsetFromLabelMapUnitScale" type="QString" value="3x:0,0,0,0,0,0"/>
-          <Option name="offsetFromLabelUnit" type="QString" value="MM"/>
-        </Option>
-      </callout>
-    </settings>
-  </labeling>
   <customproperties>
     <Option type="Map">
-      <Option name="embeddedWidgets/count" type="QString" value="0"/>
+      <Option name="dualview/previewExpressions" type="List">
+        <Option type="QString" value="&quot;code&quot;"/>
+      </Option>
+      <Option name="embeddedWidgets/count" type="int" value="0"/>
       <Option name="variableNames"/>
       <Option name="variableValues"/>
     </Option>
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
-  <layerOpacity>1</layerOpacity>
-  <SingleCategoryDiagramRenderer attributeLegend="1" diagramType="Pie">
-    <DiagramCategory labelPlacementMethod="XHeight" showAxis="0" lineSizeType="MM" backgroundAlpha="255" diagramOrientation="Up" rotationOffset="270" scaleDependency="Area" lineSizeScale="3x:0,0,0,0,0,0" spacing="0" sizeType="MM" spacingUnit="MM" scaleBasedVisibility="0" minimumSize="0" direction="1" enabled="0" sizeScale="3x:0,0,0,0,0,0" maxScaleDenominator="1e+08" penColor="#000000" penWidth="0" opacity="1" minScaleDenominator="0" penAlpha="255" barWidth="5" spacingUnitScale="3x:0,0,0,0,0,0" width="15" height="15" backgroundColor="#ffffff">
+  <layerOpacity>0.724</layerOpacity>
+  <SingleCategoryDiagramRenderer attributeLegend="1" diagramType="Histogram">
+    <DiagramCategory labelPlacementMethod="XHeight" showAxis="1" lineSizeType="MM" backgroundAlpha="255" diagramOrientation="Up" rotationOffset="270" scaleDependency="Area" lineSizeScale="3x:0,0,0,0,0,0" spacing="5" sizeType="MM" spacingUnit="MM" scaleBasedVisibility="0" minimumSize="0" direction="0" enabled="0" sizeScale="3x:0,0,0,0,0,0" maxScaleDenominator="1e+08" penColor="#000000" penWidth="0" opacity="1" minScaleDenominator="0" penAlpha="255" barWidth="5" spacingUnitScale="3x:0,0,0,0,0,0" width="15" height="15" backgroundColor="#ffffff">
       <fontProperties underline="0" italic="0" style="" description="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" bold="0" strikethrough="0"/>
       <attribute field="" colorOpacity="1" color="#000000" label=""/>
       <axisSymbol>
@@ -649,17 +509,11 @@
       </axisSymbol>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
-  <DiagramLayerSettings obstacle="0" zIndex="0" placement="2" dist="0" linePlacementFlags="2" priority="0" showAll="1">
+  <DiagramLayerSettings obstacle="0" zIndex="0" placement="2" dist="0" linePlacementFlags="18" priority="0" showAll="1">
     <properties>
       <Option type="Map">
         <Option name="name" type="QString" value=""/>
-        <Option name="properties" type="Map">
-          <Option name="show" type="Map">
-            <Option name="active" type="bool" value="true"/>
-            <Option name="field" type="QString" value="id"/>
-            <Option name="type" type="int" value="2"/>
-          </Option>
-        </Option>
+        <Option name="properties"/>
         <Option name="type" type="QString" value="collection"/>
       </Option>
     </properties>
@@ -734,6 +588,20 @@
         </config>
       </editWidget>
     </field>
+    <field configurationFlags="None" name="ABS(h.debiet_opgelegd)">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="eindpunt_geselecteerd">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
     <field configurationFlags="None" name="diepte">
       <editWidget type="TextEdit">
         <config>
@@ -749,6 +617,118 @@
       </editWidget>
     </field>
     <field configurationFlags="None" name="grondsoort">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="begroeiingsvariant_id">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="min_diepte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="max_diepte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="min_breedte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="max_breedte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="lengte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerd_diepte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerd_breedte">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerde_variant">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerde_begroeiingsvariant">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerd_verhang">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerd_verhang_inlaat">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="geselecteerd_afvoer_leidend">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="soort_vak">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="duiker_count">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="opmerkingen">
       <editWidget type="TextEdit">
         <config>
           <Option/>
@@ -783,112 +763,21 @@
         </config>
       </editWidget>
     </field>
-    <field configurationFlags="None" name="opmerkingen">
+    <field configurationFlags="None" name="line">
+      <editWidget type="Binary">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field configurationFlags="None" name="direction">
       <editWidget type="TextEdit">
         <config>
           <Option/>
         </config>
       </editWidget>
     </field>
-    <field configurationFlags="None" name="lengte">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerd_op">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="totaal_verhang">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerde_diepte">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerd_waterbreedte">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerde_bodembreedte">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerd_talud">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="verhang">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="profiel_opmerking">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="geselecteerde_begroeiingsvariant">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="fit_score">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="offset">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="overdiepte">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="overbreedte_links">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field configurationFlags="None" name="overbreedte_rechts">
+    <field configurationFlags="None" name="reversed">
       <editWidget type="TextEdit">
         <config>
           <Option/>
@@ -906,29 +795,34 @@
     <alias field="debiet_inlaat" name="" index="6"/>
     <alias field="debiet_3di" name="" index="7"/>
     <alias field="debiet_aangepast" name="" index="8"/>
-    <alias field="diepte" name="" index="9"/>
-    <alias field="breedte" name="" index="10"/>
-    <alias field="grondsoort" name="" index="11"/>
-    <alias field="kijkp_breedte" name="" index="12"/>
-    <alias field="kijkp_diepte" name="" index="13"/>
-    <alias field="kijkp_talud" name="" index="14"/>
-    <alias field="kijkp_reden" name="" index="15"/>
-    <alias field="opmerkingen" name="" index="16"/>
-    <alias field="lengte" name="" index="17"/>
-    <alias field="geselecteerd_op" name="" index="18"/>
-    <alias field="totaal_verhang" name="" index="19"/>
-    <alias field="geselecteerde_diepte" name="" index="20"/>
-    <alias field="geselecteerd_waterbreedte" name="" index="21"/>
-    <alias field="geselecteerde_bodembreedte" name="" index="22"/>
-    <alias field="geselecteerd_talud" name="" index="23"/>
-    <alias field="verhang" name="" index="24"/>
-    <alias field="profiel_opmerking" name="" index="25"/>
-    <alias field="geselecteerde_begroeiingsvariant" name="" index="26"/>
-    <alias field="fit_score" name="" index="27"/>
-    <alias field="offset" name="" index="28"/>
-    <alias field="overdiepte" name="" index="29"/>
-    <alias field="overbreedte_links" name="" index="30"/>
-    <alias field="overbreedte_rechts" name="" index="31"/>
+    <alias field="ABS(h.debiet_opgelegd)" name="" index="9"/>
+    <alias field="eindpunt_geselecteerd" name="" index="10"/>
+    <alias field="diepte" name="" index="11"/>
+    <alias field="breedte" name="" index="12"/>
+    <alias field="grondsoort" name="" index="13"/>
+    <alias field="begroeiingsvariant_id" name="" index="14"/>
+    <alias field="min_diepte" name="" index="15"/>
+    <alias field="max_diepte" name="" index="16"/>
+    <alias field="min_breedte" name="" index="17"/>
+    <alias field="max_breedte" name="" index="18"/>
+    <alias field="lengte" name="" index="19"/>
+    <alias field="geselecteerd_diepte" name="" index="20"/>
+    <alias field="geselecteerd_breedte" name="" index="21"/>
+    <alias field="geselecteerde_variant" name="" index="22"/>
+    <alias field="geselecteerde_begroeiingsvariant" name="" index="23"/>
+    <alias field="geselecteerd_verhang" name="" index="24"/>
+    <alias field="geselecteerd_verhang_inlaat" name="" index="25"/>
+    <alias field="geselecteerd_afvoer_leidend" name="" index="26"/>
+    <alias field="soort_vak" name="" index="27"/>
+    <alias field="duiker_count" name="" index="28"/>
+    <alias field="opmerkingen" name="" index="29"/>
+    <alias field="kijkp_breedte" name="" index="30"/>
+    <alias field="kijkp_diepte" name="" index="31"/>
+    <alias field="kijkp_talud" name="" index="32"/>
+    <alias field="kijkp_reden" name="" index="33"/>
+    <alias field="line" name="" index="34"/>
+    <alias field="direction" name="" index="35"/>
+    <alias field="reversed" name="" index="36"/>
   </aliases>
   <defaults>
     <default field="id" expression="" applyOnUpdate="0"/>
@@ -940,29 +834,34 @@
     <default field="debiet_inlaat" expression="" applyOnUpdate="0"/>
     <default field="debiet_3di" expression="" applyOnUpdate="0"/>
     <default field="debiet_aangepast" expression="" applyOnUpdate="0"/>
+    <default field="ABS(h.debiet_opgelegd)" expression="" applyOnUpdate="0"/>
+    <default field="eindpunt_geselecteerd" expression="" applyOnUpdate="0"/>
     <default field="diepte" expression="" applyOnUpdate="0"/>
     <default field="breedte" expression="" applyOnUpdate="0"/>
     <default field="grondsoort" expression="" applyOnUpdate="0"/>
+    <default field="begroeiingsvariant_id" expression="" applyOnUpdate="0"/>
+    <default field="min_diepte" expression="" applyOnUpdate="0"/>
+    <default field="max_diepte" expression="" applyOnUpdate="0"/>
+    <default field="min_breedte" expression="" applyOnUpdate="0"/>
+    <default field="max_breedte" expression="" applyOnUpdate="0"/>
+    <default field="lengte" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerd_diepte" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerd_breedte" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerde_variant" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerde_begroeiingsvariant" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerd_verhang" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerd_verhang_inlaat" expression="" applyOnUpdate="0"/>
+    <default field="geselecteerd_afvoer_leidend" expression="" applyOnUpdate="0"/>
+    <default field="soort_vak" expression="" applyOnUpdate="0"/>
+    <default field="duiker_count" expression="" applyOnUpdate="0"/>
+    <default field="opmerkingen" expression="" applyOnUpdate="0"/>
     <default field="kijkp_breedte" expression="" applyOnUpdate="0"/>
     <default field="kijkp_diepte" expression="" applyOnUpdate="0"/>
     <default field="kijkp_talud" expression="" applyOnUpdate="0"/>
     <default field="kijkp_reden" expression="" applyOnUpdate="0"/>
-    <default field="opmerkingen" expression="" applyOnUpdate="0"/>
-    <default field="lengte" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerd_op" expression="" applyOnUpdate="0"/>
-    <default field="totaal_verhang" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerde_diepte" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerd_waterbreedte" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerde_bodembreedte" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerd_talud" expression="" applyOnUpdate="0"/>
-    <default field="verhang" expression="" applyOnUpdate="0"/>
-    <default field="profiel_opmerking" expression="" applyOnUpdate="0"/>
-    <default field="geselecteerde_begroeiingsvariant" expression="" applyOnUpdate="0"/>
-    <default field="fit_score" expression="" applyOnUpdate="0"/>
-    <default field="offset" expression="" applyOnUpdate="0"/>
-    <default field="overdiepte" expression="" applyOnUpdate="0"/>
-    <default field="overbreedte_links" expression="" applyOnUpdate="0"/>
-    <default field="overbreedte_rechts" expression="" applyOnUpdate="0"/>
+    <default field="line" expression="" applyOnUpdate="0"/>
+    <default field="direction" expression="" applyOnUpdate="0"/>
+    <default field="reversed" expression="" applyOnUpdate="0"/>
   </defaults>
   <constraints>
     <constraint field="id" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
@@ -974,29 +873,34 @@
     <constraint field="debiet_inlaat" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="debiet_3di" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="debiet_aangepast" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="ABS(h.debiet_opgelegd)" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="eindpunt_geselecteerd" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="breedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="grondsoort" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="begroeiingsvariant_id" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="min_diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="max_diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="min_breedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="max_breedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="lengte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerd_diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerd_breedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerde_variant" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerde_begroeiingsvariant" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerd_verhang" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerd_verhang_inlaat" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="geselecteerd_afvoer_leidend" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="soort_vak" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="duiker_count" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="opmerkingen" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="kijkp_breedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="kijkp_diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="kijkp_talud" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
     <constraint field="kijkp_reden" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="opmerkingen" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="lengte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerd_op" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="totaal_verhang" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerde_diepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerd_waterbreedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerde_bodembreedte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerd_talud" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="verhang" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="profiel_opmerking" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="geselecteerde_begroeiingsvariant" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="fit_score" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="offset" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="overdiepte" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="overbreedte_links" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
-    <constraint field="overbreedte_rechts" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="line" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="direction" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
+    <constraint field="reversed" constraints="0" exp_strength="0" unique_strength="0" notnull_strength="0"/>
   </constraints>
   <constraintExpressions>
     <constraint field="id" exp="" desc=""/>
@@ -1008,29 +912,34 @@
     <constraint field="debiet_inlaat" exp="" desc=""/>
     <constraint field="debiet_3di" exp="" desc=""/>
     <constraint field="debiet_aangepast" exp="" desc=""/>
+    <constraint field="ABS(h.debiet_opgelegd)" exp="" desc=""/>
+    <constraint field="eindpunt_geselecteerd" exp="" desc=""/>
     <constraint field="diepte" exp="" desc=""/>
     <constraint field="breedte" exp="" desc=""/>
     <constraint field="grondsoort" exp="" desc=""/>
+    <constraint field="begroeiingsvariant_id" exp="" desc=""/>
+    <constraint field="min_diepte" exp="" desc=""/>
+    <constraint field="max_diepte" exp="" desc=""/>
+    <constraint field="min_breedte" exp="" desc=""/>
+    <constraint field="max_breedte" exp="" desc=""/>
+    <constraint field="lengte" exp="" desc=""/>
+    <constraint field="geselecteerd_diepte" exp="" desc=""/>
+    <constraint field="geselecteerd_breedte" exp="" desc=""/>
+    <constraint field="geselecteerde_variant" exp="" desc=""/>
+    <constraint field="geselecteerde_begroeiingsvariant" exp="" desc=""/>
+    <constraint field="geselecteerd_verhang" exp="" desc=""/>
+    <constraint field="geselecteerd_verhang_inlaat" exp="" desc=""/>
+    <constraint field="geselecteerd_afvoer_leidend" exp="" desc=""/>
+    <constraint field="soort_vak" exp="" desc=""/>
+    <constraint field="duiker_count" exp="" desc=""/>
+    <constraint field="opmerkingen" exp="" desc=""/>
     <constraint field="kijkp_breedte" exp="" desc=""/>
     <constraint field="kijkp_diepte" exp="" desc=""/>
     <constraint field="kijkp_talud" exp="" desc=""/>
     <constraint field="kijkp_reden" exp="" desc=""/>
-    <constraint field="opmerkingen" exp="" desc=""/>
-    <constraint field="lengte" exp="" desc=""/>
-    <constraint field="geselecteerd_op" exp="" desc=""/>
-    <constraint field="totaal_verhang" exp="" desc=""/>
-    <constraint field="geselecteerde_diepte" exp="" desc=""/>
-    <constraint field="geselecteerd_waterbreedte" exp="" desc=""/>
-    <constraint field="geselecteerde_bodembreedte" exp="" desc=""/>
-    <constraint field="geselecteerd_talud" exp="" desc=""/>
-    <constraint field="verhang" exp="" desc=""/>
-    <constraint field="profiel_opmerking" exp="" desc=""/>
-    <constraint field="geselecteerde_begroeiingsvariant" exp="" desc=""/>
-    <constraint field="fit_score" exp="" desc=""/>
-    <constraint field="offset" exp="" desc=""/>
-    <constraint field="overdiepte" exp="" desc=""/>
-    <constraint field="overbreedte_links" exp="" desc=""/>
-    <constraint field="overbreedte_rechts" exp="" desc=""/>
+    <constraint field="line" exp="" desc=""/>
+    <constraint field="direction" exp="" desc=""/>
+    <constraint field="reversed" exp="" desc=""/>
   </constraintExpressions>
   <expressionfields/>
   <attributeactions>
@@ -1042,35 +951,40 @@
       <column width="-1" name="code" type="field" hidden="0"/>
       <column width="-1" name="categorieoppwaterlichaam" type="field" hidden="0"/>
       <column width="-1" name="streefpeil" type="field" hidden="0"/>
+      <column width="-1" name="zomerpeil" type="field" hidden="0"/>
       <column width="-1" name="debiet" type="field" hidden="0"/>
+      <column width="-1" name="debiet_inlaat" type="field" hidden="0"/>
+      <column width="-1" name="debiet_3di" type="field" hidden="0"/>
+      <column width="-1" name="debiet_aangepast" type="field" hidden="0"/>
+      <column width="-1" name="ABS(h.debiet_opgelegd)" type="field" hidden="0"/>
+      <column width="-1" name="eindpunt_geselecteerd" type="field" hidden="0"/>
       <column width="-1" name="diepte" type="field" hidden="0"/>
       <column width="-1" name="breedte" type="field" hidden="0"/>
-      <column width="-1" name="lengte" type="field" hidden="0"/>
-      <column width="-1" name="geselecteerd_op" type="field" hidden="0"/>
-      <column width="159" name="geselecteerde_diepte" type="field" hidden="0"/>
-      <column width="-1" name="geselecteerd_waterbreedte" type="field" hidden="0"/>
-      <column width="-1" name="geselecteerde_bodembreedte" type="field" hidden="0"/>
-      <column width="-1" name="geselecteerd_talud" type="field" hidden="0"/>
-      <column width="-1" name="verhang" type="field" hidden="0"/>
-      <column width="-1" name="profiel_opmerking" type="field" hidden="0"/>
-      <column width="-1" name="fit_score" type="field" hidden="0"/>
-      <column width="-1" name="offset" type="field" hidden="0"/>
-      <column width="-1" name="overdiepte" type="field" hidden="0"/>
-      <column width="-1" name="overbreedte_links" type="field" hidden="0"/>
-      <column width="-1" name="overbreedte_rechts" type="field" hidden="0"/>
-      <column width="-1" type="actions" hidden="1"/>
-      <column width="-1" name="geselecteerde_begroeiingsvariant" type="field" hidden="0"/>
-      <column width="-1" name="debiet_3di" type="field" hidden="0"/>
-      <column width="-1" name="zomerpeil" type="field" hidden="0"/>
-      <column width="-1" name="debiet_inlaat" type="field" hidden="0"/>
       <column width="-1" name="grondsoort" type="field" hidden="0"/>
+      <column width="-1" name="begroeiingsvariant_id" type="field" hidden="0"/>
+      <column width="-1" name="min_diepte" type="field" hidden="0"/>
+      <column width="-1" name="max_diepte" type="field" hidden="0"/>
+      <column width="-1" name="min_breedte" type="field" hidden="0"/>
+      <column width="-1" name="max_breedte" type="field" hidden="0"/>
+      <column width="-1" name="lengte" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerd_diepte" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerd_breedte" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerde_variant" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerde_begroeiingsvariant" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerd_verhang" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerd_verhang_inlaat" type="field" hidden="0"/>
+      <column width="-1" name="geselecteerd_afvoer_leidend" type="field" hidden="0"/>
+      <column width="-1" name="soort_vak" type="field" hidden="0"/>
+      <column width="-1" name="duiker_count" type="field" hidden="0"/>
+      <column width="-1" name="opmerkingen" type="field" hidden="0"/>
       <column width="-1" name="kijkp_breedte" type="field" hidden="0"/>
       <column width="-1" name="kijkp_diepte" type="field" hidden="0"/>
       <column width="-1" name="kijkp_talud" type="field" hidden="0"/>
       <column width="-1" name="kijkp_reden" type="field" hidden="0"/>
-      <column width="-1" name="opmerkingen" type="field" hidden="0"/>
-      <column width="-1" name="totaal_verhang" type="field" hidden="0"/>
-      <column width="-1" name="debiet_aangepast" type="field" hidden="0"/>
+      <column width="-1" name="line" type="field" hidden="0"/>
+      <column width="-1" name="direction" type="field" hidden="0"/>
+      <column width="-1" name="reversed" type="field" hidden="0"/>
+      <column width="-1" type="actions" hidden="1"/>
     </columns>
   </attributetableconfig>
   <conditionalstyles>
@@ -1078,28 +992,31 @@
     <fieldstyles/>
   </conditionalstyles>
   <storedexpressions/>
-  <editform tolerant="1">.</editform>
+  <editform tolerant="1"></editform>
   <editforminit/>
   <editforminitcodesource>0</editforminitcodesource>
-  <editforminitfilepath>.</editforminitfilepath>
+  <editforminitfilepath></editforminitfilepath>
   <editforminitcode><![CDATA[# -*- coding: utf-8 -*-
 """
-Formulieren van QGIS mogen een functie van Python hebben die wordt aangeroepen wanneer het formulier wordt geopend.
+Formulieren van QGIS kunnen een functie voor Python hebben die wordt aangeroepen wanneer het formulier wordt geopend.
 
 Gebruik deze functie om extra logica aan uw formulieren toe te voegen.
 
-Voer de naam van de functie in in het veld "Python Init functie".
+Voer de naam van de functie in het veld "Python Init function"
+in.
 Een voorbeeld volgt:
 """
-from PyQt4.QtGui import QWidget
+from qgis.PyQt.QtWidgets import QWidget
 
 def my_form_open(dialog, layer, feature):
-	geom = feature.geometry()
-	control = dialog.findChild(QWidget, "MyLineEdit")
+geom = feature.geometry()
+control = dialog.findChild(QWidget, "MyLineEdit")
 ]]></editforminitcode>
   <featformsuppress>0</featformsuppress>
   <editorlayout>generatedlayout</editorlayout>
   <editable>
+    <field name="ABS(h.debiet_opgelegd)" editable="1"/>
+    <field name="begroeiingsvariant_id" editable="1"/>
     <field name="breedte" editable="1"/>
     <field name="categorieoppwaterlichaam" editable="1"/>
     <field name="code" editable="1"/>
@@ -1108,13 +1025,16 @@ def my_form_open(dialog, layer, feature):
     <field name="debiet_aangepast" editable="1"/>
     <field name="debiet_inlaat" editable="1"/>
     <field name="diepte" editable="1"/>
-    <field name="fit_score" editable="1"/>
-    <field name="geselecteerd_op" editable="1"/>
-    <field name="geselecteerd_talud" editable="1"/>
-    <field name="geselecteerd_waterbreedte" editable="1"/>
+    <field name="direction" editable="1"/>
+    <field name="duiker_count" editable="1"/>
+    <field name="eindpunt_geselecteerd" editable="1"/>
+    <field name="geselecteerd_afvoer_leidend" editable="1"/>
+    <field name="geselecteerd_breedte" editable="1"/>
+    <field name="geselecteerd_diepte" editable="1"/>
+    <field name="geselecteerd_verhang" editable="1"/>
+    <field name="geselecteerd_verhang_inlaat" editable="1"/>
     <field name="geselecteerde_begroeiingsvariant" editable="1"/>
-    <field name="geselecteerde_bodembreedte" editable="1"/>
-    <field name="geselecteerde_diepte" editable="1"/>
+    <field name="geselecteerde_variant" editable="1"/>
     <field name="grondsoort" editable="1"/>
     <field name="id" editable="1"/>
     <field name="kijkp_breedte" editable="1"/>
@@ -1122,19 +1042,20 @@ def my_form_open(dialog, layer, feature):
     <field name="kijkp_reden" editable="1"/>
     <field name="kijkp_talud" editable="1"/>
     <field name="lengte" editable="1"/>
-    <field name="offset" editable="1"/>
+    <field name="line" editable="1"/>
+    <field name="max_breedte" editable="1"/>
+    <field name="max_diepte" editable="1"/>
+    <field name="min_breedte" editable="1"/>
+    <field name="min_diepte" editable="1"/>
     <field name="opmerkingen" editable="1"/>
-    <field name="overbreedte_links" editable="1"/>
-    <field name="overbreedte_rechts" editable="1"/>
-    <field name="overdiepte" editable="1"/>
-    <field name="profiel_opmerking" editable="1"/>
+    <field name="reversed" editable="1"/>
+    <field name="soort_vak" editable="1"/>
     <field name="streefpeil" editable="1"/>
-    <field name="taludvoorkeur" editable="1"/>
-    <field name="totaal_verhang" editable="1"/>
-    <field name="verhang" editable="1"/>
     <field name="zomerpeil" editable="1"/>
   </editable>
   <labelOnTop>
+    <field labelOnTop="0" name="ABS(h.debiet_opgelegd)"/>
+    <field labelOnTop="0" name="begroeiingsvariant_id"/>
     <field labelOnTop="0" name="breedte"/>
     <field labelOnTop="0" name="categorieoppwaterlichaam"/>
     <field labelOnTop="0" name="code"/>
@@ -1143,13 +1064,16 @@ def my_form_open(dialog, layer, feature):
     <field labelOnTop="0" name="debiet_aangepast"/>
     <field labelOnTop="0" name="debiet_inlaat"/>
     <field labelOnTop="0" name="diepte"/>
-    <field labelOnTop="0" name="fit_score"/>
-    <field labelOnTop="0" name="geselecteerd_op"/>
-    <field labelOnTop="0" name="geselecteerd_talud"/>
-    <field labelOnTop="0" name="geselecteerd_waterbreedte"/>
+    <field labelOnTop="0" name="direction"/>
+    <field labelOnTop="0" name="duiker_count"/>
+    <field labelOnTop="0" name="eindpunt_geselecteerd"/>
+    <field labelOnTop="0" name="geselecteerd_afvoer_leidend"/>
+    <field labelOnTop="0" name="geselecteerd_breedte"/>
+    <field labelOnTop="0" name="geselecteerd_diepte"/>
+    <field labelOnTop="0" name="geselecteerd_verhang"/>
+    <field labelOnTop="0" name="geselecteerd_verhang_inlaat"/>
     <field labelOnTop="0" name="geselecteerde_begroeiingsvariant"/>
-    <field labelOnTop="0" name="geselecteerde_bodembreedte"/>
-    <field labelOnTop="0" name="geselecteerde_diepte"/>
+    <field labelOnTop="0" name="geselecteerde_variant"/>
     <field labelOnTop="0" name="grondsoort"/>
     <field labelOnTop="0" name="id"/>
     <field labelOnTop="0" name="kijkp_breedte"/>
@@ -1157,19 +1081,20 @@ def my_form_open(dialog, layer, feature):
     <field labelOnTop="0" name="kijkp_reden"/>
     <field labelOnTop="0" name="kijkp_talud"/>
     <field labelOnTop="0" name="lengte"/>
-    <field labelOnTop="0" name="offset"/>
+    <field labelOnTop="0" name="line"/>
+    <field labelOnTop="0" name="max_breedte"/>
+    <field labelOnTop="0" name="max_diepte"/>
+    <field labelOnTop="0" name="min_breedte"/>
+    <field labelOnTop="0" name="min_diepte"/>
     <field labelOnTop="0" name="opmerkingen"/>
-    <field labelOnTop="0" name="overbreedte_links"/>
-    <field labelOnTop="0" name="overbreedte_rechts"/>
-    <field labelOnTop="0" name="overdiepte"/>
-    <field labelOnTop="0" name="profiel_opmerking"/>
+    <field labelOnTop="0" name="reversed"/>
+    <field labelOnTop="0" name="soort_vak"/>
     <field labelOnTop="0" name="streefpeil"/>
-    <field labelOnTop="0" name="taludvoorkeur"/>
-    <field labelOnTop="0" name="totaal_verhang"/>
-    <field labelOnTop="0" name="verhang"/>
     <field labelOnTop="0" name="zomerpeil"/>
   </labelOnTop>
   <reuseLastValue>
+    <field reuseLastValue="0" name="ABS(h.debiet_opgelegd)"/>
+    <field reuseLastValue="0" name="begroeiingsvariant_id"/>
     <field reuseLastValue="0" name="breedte"/>
     <field reuseLastValue="0" name="categorieoppwaterlichaam"/>
     <field reuseLastValue="0" name="code"/>
@@ -1178,13 +1103,16 @@ def my_form_open(dialog, layer, feature):
     <field reuseLastValue="0" name="debiet_aangepast"/>
     <field reuseLastValue="0" name="debiet_inlaat"/>
     <field reuseLastValue="0" name="diepte"/>
-    <field reuseLastValue="0" name="fit_score"/>
-    <field reuseLastValue="0" name="geselecteerd_op"/>
-    <field reuseLastValue="0" name="geselecteerd_talud"/>
-    <field reuseLastValue="0" name="geselecteerd_waterbreedte"/>
+    <field reuseLastValue="0" name="direction"/>
+    <field reuseLastValue="0" name="duiker_count"/>
+    <field reuseLastValue="0" name="eindpunt_geselecteerd"/>
+    <field reuseLastValue="0" name="geselecteerd_afvoer_leidend"/>
+    <field reuseLastValue="0" name="geselecteerd_breedte"/>
+    <field reuseLastValue="0" name="geselecteerd_diepte"/>
+    <field reuseLastValue="0" name="geselecteerd_verhang"/>
+    <field reuseLastValue="0" name="geselecteerd_verhang_inlaat"/>
     <field reuseLastValue="0" name="geselecteerde_begroeiingsvariant"/>
-    <field reuseLastValue="0" name="geselecteerde_bodembreedte"/>
-    <field reuseLastValue="0" name="geselecteerde_diepte"/>
+    <field reuseLastValue="0" name="geselecteerde_variant"/>
     <field reuseLastValue="0" name="grondsoort"/>
     <field reuseLastValue="0" name="id"/>
     <field reuseLastValue="0" name="kijkp_breedte"/>
@@ -1192,20 +1120,20 @@ def my_form_open(dialog, layer, feature):
     <field reuseLastValue="0" name="kijkp_reden"/>
     <field reuseLastValue="0" name="kijkp_talud"/>
     <field reuseLastValue="0" name="lengte"/>
-    <field reuseLastValue="0" name="offset"/>
+    <field reuseLastValue="0" name="line"/>
+    <field reuseLastValue="0" name="max_breedte"/>
+    <field reuseLastValue="0" name="max_diepte"/>
+    <field reuseLastValue="0" name="min_breedte"/>
+    <field reuseLastValue="0" name="min_diepte"/>
     <field reuseLastValue="0" name="opmerkingen"/>
-    <field reuseLastValue="0" name="overbreedte_links"/>
-    <field reuseLastValue="0" name="overbreedte_rechts"/>
-    <field reuseLastValue="0" name="overdiepte"/>
-    <field reuseLastValue="0" name="profiel_opmerking"/>
+    <field reuseLastValue="0" name="reversed"/>
+    <field reuseLastValue="0" name="soort_vak"/>
     <field reuseLastValue="0" name="streefpeil"/>
-    <field reuseLastValue="0" name="totaal_verhang"/>
-    <field reuseLastValue="0" name="verhang"/>
     <field reuseLastValue="0" name="zomerpeil"/>
   </reuseLastValue>
   <dataDefinedFieldProperties/>
   <widgets/>
-  <previewExpression>COALESCE( "id", '&lt;NULL>' )</previewExpression>
+  <previewExpression>"code"</previewExpression>
   <mapTip></mapTip>
   <layerGeometryType>1</layerGeometryType>
 </qgis>

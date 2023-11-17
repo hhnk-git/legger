@@ -71,6 +71,7 @@ class LayerManager():
         styled_layers = OrderedDict([
             ('basisgegevens', [
                 LayerDefinition('debiet', 'hydroobject', 'debiet', 'debiet', 'geometry', 'min_max_line', False),
+                LayerDefinition('grondsoort', 'hydroobjects_kenmerken', 'grondsoort', 'grondsoort', 'geometry', None, False),
                 LayerDefinition('categorie', 'hydroobject', 'categorieoppwaterlichaam', 'category', 'geometry',
                                 'min_max_line', False),
                 # ('du debiet', 'duikersifonhevel', 'debiet', 'debiet', 'geometry', 'min_max_line'),
@@ -91,6 +92,7 @@ class LayerManager():
             ]),
             ('gekozen legger', [
                 LayerDefinition('voortgang', 'hydroobjects_selected_legger', '', 'voortgang', 'geometry', None, True),
+                LayerDefinition('laatst aangepast', 'hydroobjects_selected_legger', '', 'laatst aangepast', 'geometry', None, True),
                 LayerDefinition('verhang', 'hydroobjects_selected_legger', '', 'verhang', 'geometry', None, True),
                 LayerDefinition('gekozen diepte [m]', 'hydroobjects_selected_legger', '', 'gekozen_diepte', 'geometry',
                                 None, True),
