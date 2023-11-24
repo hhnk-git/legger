@@ -314,7 +314,7 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.feedbacktext.setText("Alle taken uitgevoerd.")
 
     def post_process(self):
-        calc_gradient(self.iface, self.polder_datasource)
+        calc_gradient(self.polder_datasource)
         self.feedbacktext.setText("Totaal gradient berekend")
 
     def setup_ui(self):

@@ -11,8 +11,10 @@ from qgis.core import (
     QgsVectorLayer, QgsFeature, QgsPoint, QgsField, QgsGeometry)
 
 from qgis.analysis import QgsVectorLayerDirector
-from legger.utils.new_network import NewNetwork, AttributeProperter
+from legger.utils.network import Network
 
+
+# todo: rewrite for Network class (instead of new Network class))
 
 # @unittest.skipIf()
 class TestGradientCalculationNetwork(unittest.TestCase):
@@ -43,7 +45,7 @@ class TestGradientCalculationNetwork(unittest.TestCase):
         """
         line_layer, director, distance_properter = self.get_line_layer_and_director(self.one_simple_line_network)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
 
         calc_gradient_for_network(network)
@@ -70,7 +72,7 @@ class TestGradientCalculationNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
 
         calc_gradient_for_network(network)
@@ -118,7 +120,7 @@ class TestGradientCalculationNetwork(unittest.TestCase):
         line_layer, director, distance_properter = self.get_line_layer_and_director(
             one_simple_line_network_for_redistrubution)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
 
         arc_dict, start_arcs = network.build_tree()
         calc_gradient_for_network(network)

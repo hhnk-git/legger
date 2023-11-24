@@ -1,8 +1,7 @@
-
-
 import unittest
 
 from legger.tests.utilities import get_qgis_app
+
 QGIS_APP = get_qgis_app()
 
 from PyQt5.QtCore import QVariant
@@ -12,8 +11,10 @@ from qgis.core import (
 
 from random import shuffle
 from qgis.analysis import QgsVectorLayerDirector
-from legger.utils.new_network import NewNetwork, AttributeProperter
+from legger.utils.network import Network
 
+
+# todo: rewrite for Network class (instead of new Network class))
 
 # @unittest.skipIf()
 class TestTheoreticalNetwork(unittest.TestCase):
@@ -40,7 +41,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
         """
         line_layer, director, distance_properter = self.get_line_layer_and_director(self.one_simple_line_network)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
         arc_nrs = sorted([arc_dict.get(arc['arc_nr']).feature.id() for arc in start_arcs])
 
@@ -62,7 +63,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
         arc_nrs = sorted([arc_dict.get(arc['arc_nr']).feature.id() for arc in start_arcs])
 
@@ -82,7 +83,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
         arc_nrs = sorted([arc_dict.get(arc['arc_nr']).feature.id() for arc in start_arcs])
 
@@ -103,7 +104,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
         arc_nrs = sorted([arc_dict.get(arc['arc_nr']).feature.id() for arc in start_arcs])
 
@@ -120,7 +121,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
             shuffle(layer_data)
             line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-            network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+            network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
             arc_dict, start_arcs = network.build_tree()
             arc_nrs = sorted([arc_dict.get(arc['arc_nr']).feature.id() for arc in start_arcs])
 
@@ -138,7 +139,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
         """
         line_layer, director, distance_properter = self.get_line_layer_and_director(self.one_simple_line_network)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
 
         self.assertEqual(1, len(start_arcs))
@@ -161,7 +162,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
 
         self.assertEqual(2, len(start_arcs))
@@ -189,7 +190,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         line_layer, director, distance_properter = self.get_line_layer_and_director(layer_data)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         arc_dict, start_arcs = network.build_tree()
 
         self.assertEqual(1, len(start_arcs))
@@ -197,7 +198,6 @@ class TestTheoreticalNetwork(unittest.TestCase):
 
         elem_two = [arc for arc in arc_dict.values() if arc['feat_id'] == 2][0]
         self.assertEqual(1, elem_two['min_category_in_path'])
-
 
     def test_rerouting_of_flow(self):
         """
@@ -223,9 +223,10 @@ class TestTheoreticalNetwork(unittest.TestCase):
             {'id': 9, 'debiet': 2.6, 'direction': 2, 'categorieoppwaterlichaam': 1, 'geometry': [(0, -1), (0, 0)]},
         ]
 
-        line_layer, director, distance_properter = self.get_line_layer_and_director(one_simple_line_network_for_redistrubution)
+        line_layer, director, distance_properter = self.get_line_layer_and_director(
+            one_simple_line_network_for_redistrubution)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
         new_flows, arc_tree = network.re_distribute_flow()
 
         self.assertEqual(len(new_flows), len(one_simple_line_network_for_redistrubution))
@@ -266,7 +267,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
         line_layer, director, distance_properter = self.get_line_layer_and_director(
             one_simple_line_network_for_redistrubution)
 
-        network = NewNetwork(line_layer, line_layer, director, distance_properter, id_field='id')
+        network = Network(line_layer, line_layer, director, distance_properter, id_field='id')
 
         # line_layer_updates = network.fill_bidirectional_gaps(bidirectional_islands)
 
@@ -302,7 +303,7 @@ class TestTheoreticalNetwork(unittest.TestCase):
             feat['direction'] = l['direction']
             feat['reversed'] = 1 if l['direction'] == 2 else 0
             feat['categorieoppwaterlichaam'] = l['categorieoppwaterlichaam']
-            geom = QgsGeometry().fromPolyline([QgsPoint(150000+p[0], 150000+p[1]) for p in l['geometry']])
+            geom = QgsGeometry().fromPolyline([QgsPoint(150000 + p[0], 150000 + p[1]) for p in l['geometry']])
             feat.setGeometry(geom)
             features.append(feat)
             feat['length'] = geom.length()

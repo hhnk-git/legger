@@ -34,7 +34,9 @@ class Definitions(object):
 class Line(Definitions):
 
     def __init__(self, oid, startnode_id, endnode_id, category, length,
-                 debiet_3di, debiet, debiet_modified, target_level, has_startnode=False, **extra):
+                 debiet_3di, debiet, debiet_modified, target_level, soort_vak,
+                 duiker_count, verhang,
+                 has_startnode=False, **extra):
         self.graph = None
         self.nr = None
         self.id = oid
@@ -47,10 +49,15 @@ class Line(Definitions):
         self.category = category
         self.length = length
         self.target_level = target_level
+        self.soort_vak = soort_vak
         self.debiet_3di = debiet_3di
         self.debiet_db = debiet
         self.debiet_modified = debiet_modified
         self.surplus = None
+        self.verhang = verhang
+        self.duiker_count = duiker_count
+
+        self.tot_verhang = None
 
         self.reversed = False
         self.forced_direction = False
@@ -310,7 +317,6 @@ class Network(object):
 
     # todo:
     #     - move virtual_layer and endpoint_layer outside this class
-    #     - set endpoints on 90% or 10 meter before endpoint of hydrovak
 
     def __init__(self, spatialite_path, graph=None,
                  full_line_layer=None, virtual_tree_layer=None, endpoint_layer=None, id_field="id"):
@@ -481,15 +487,20 @@ class Network(object):
 
             self.db_cursor.execute("""
                 SELECT gl.hydro_id as hydro_id, gl.startnode_id, gl.endnode_id, ho.categorieoppwaterlichaam, 
-                ST_LENGTH(ho.geometry), ho.debiet_3di, ho.debiet, ho.streefpeil, ho.eindpunt_geselecteerd
+                ST_LENGTH(ho.geometry), ho.debiet_3di, ho.debiet, ho.streefpeil, kn.soort_vak, 
+                ho.duiker_count, v.verhang, ho.eindpunt_geselecteerd
                 FROM 
                     graph_lines gl
                 INNER JOIN hydroobject ho ON ho.id = gl.hydro_id
+                INNER JOIN kenmerken kn ON ho.id = kn.hydro_id
+                LEFT OUTER JOIN geselecteerd s ON ho.id = s.hydro_id
+                LEFT OUTER JOIN varianten v ON s.variant_id = v.id
             """)
             lines = [
                 Line(nr=nr, oid=r[0], startnode_id=r[1], endnode_id=r[2], category=r[3], length=r[4], debiet_3di=r[5],
-                     debiet=r[6], debiet_modified=None, target_level=r[7],
-                     has_startnode=r[8])
+                     debiet=r[6], debiet_modified=None, target_level=r[7], soort_vak=r[8],
+                     duiker_count=r[9], verhang=r[10],
+                     has_startnode=r[11])
                 for nr, r in enumerate(self.db_cursor.fetchall())]
 
             self._graph = Graph(
