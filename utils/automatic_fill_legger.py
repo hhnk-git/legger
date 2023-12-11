@@ -314,7 +314,7 @@ class AutomaticFillLegger(object):
                                                    or float(option.get("verhang_inlaat")) <= gradient_norm)
                         })
             # als niet gevonden, dan alleen op breedte voor hydrovakken met een oppervlak kleiner dan 25 ha (0.042 m3/s)
-            if not found and profiel_breedte is not None and debiet <= 0.042 and debiet_inlaat <= 0.042:
+            if not found and profiel_breedte is not None and debiet_inlaat is not None and debiet <= 0.042 and debiet_inlaat <= 0.042:
                 gradient_norm = get_gradient_norm(grondsoort)
                 for option in varianten:
                     if (float(option.get("lwbreedte")) <= profiel_breedte):

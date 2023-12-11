@@ -66,10 +66,14 @@ def calc_pitlo_griffioen(flow, ditch_bottom_width, water_depth, slope, friction_
     B = A_2 * friction_begroeiing
     C = friction_manning * A_1 * (R ** 0.66666666666667)
 
-    try:
-        gradient = 100000 * (2 * B * flow + C ** 2 - C * sqrt(4 * B * flow + C ** 2)) / (2 * B ** 2)
-    except TypeError:
-        a = 1
+    if B == 0:
+        gradient = 99999999
+    else:
+
+        try:
+            gradient = 100000 * (2 * B * flow + C ** 2 - C * sqrt(4 * B * flow + C ** 2)) / (2 * B ** 2)
+        except TypeError:
+            gradient = 99999
 
     return gradient
 
