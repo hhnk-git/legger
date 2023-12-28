@@ -438,6 +438,7 @@ class LeggerWidget(QDockWidget):
                     - 'maximum' --> not implemented yet
         :return:
         """
+        profile_variant_count = None
 
         output_hydrovakken = [node]
         if initial:
@@ -473,7 +474,7 @@ class LeggerWidget(QDockWidget):
 
                     profile_variant = self.session.query(Varianten).filter(
                         Varianten.hydro_id == node.hydrovak.get('hydro_id'),
-                        Varianten.begroeiingsvariant_id == begroeiingsvariant_int,
+                        Varianten.begroeiingsvariant_id.like(begroeiingsvariant_int),
                         Varianten.diepte < depth + precision,
                         Varianten.diepte > depth - precision
                     )
@@ -488,15 +489,17 @@ class LeggerWidget(QDockWidget):
                         Varianten.diepte > depth - precision
                     )
 
-            if profile_variant.count() > 0:
+            profile_variants = profile_variant.all()
+            profile_variant_count = len(profile_variants) if profile_variants else 0
 
+            if profile_variant_count > 0:
                 if hover:
                     # self.legger_model.setDataItemKey(node, 'sel d', depth)
                     self.legger_model.setDataItemKey(node, 'selected_depth_tmp', depth)
                 else:
                     # get all info to display in legger table
                     over_depth = node.hydrovak.get('depth') - depth if node.hydrovak.get('depth') is not None else None
-                    profilev = profile_variant.first()
+                    profilev = profile_variants[0]
                     width = profilev.waterbreedte
                     over_width = node.hydrovak.get('width') - width \
                         if node.hydrovak.get('width') is not None else None
