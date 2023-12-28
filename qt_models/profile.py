@@ -97,6 +97,11 @@ class ProfileModel(ModifiedBaseModel):
                            round=2,
                            column_name='dpt',
                            column_tooltip='profieldiepte [m]')
+        width = ValueField(show=True,
+                           column_width=45,
+                           round=2,
+                           column_name='br',
+                           column_tooltip='profielbreedte [m]')
         begroeiingsvariant = ValueField(show=True,
                                         column_width=70,
                                         column_name='begr',
