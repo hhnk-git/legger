@@ -95,8 +95,13 @@ class ProfileModel(ModifiedBaseModel):
         depth = ValueField(show=True,
                            column_width=45,
                            round=2,
-                           column_name='dpt',
-                           column_tooltip='profieldiepte [m]')
+                           column_name='O-dpt',
+                           column_tooltip='Onderhoudsdiepte (Leggerplus) [m]')
+        hydrau_depth = ValueField(show=True,
+                           column_width=45,
+                           round=2,
+                           column_name='L-dpt',
+                           column_tooltip='Legger diepte [m]')
         width = ValueField(show=True,
                            column_width=45,
                            round=2,
