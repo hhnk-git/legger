@@ -77,6 +77,7 @@ class LayerManager():
                 # ('du debiet', 'duikersifonhevel', 'debiet', 'debiet', 'geometry', 'min_max_line'),
             ]),
             ('afgeleid', [
+                LayerDefinition('Totaal verhang', 'hydroobjects_selected_legger', '', 'totaal_verhang', 'geometry', None, True)
             ]),
             ('tbv begroeiingsgraad', [
                 LayerDefinition('aanwijzen', 'hydroobject', 'begroeiingsvariant_id', 'begroeiingsvariant', 'geometry',
