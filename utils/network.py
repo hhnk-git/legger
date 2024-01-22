@@ -858,8 +858,7 @@ class Network(object):
         # remove duplicates
 
         if node_queue is None or len(node_queue) == 0:
-            raise Exception('lijst met eindpunten is leeg?!.')
-            # return False, []
+            return False, []
 
         last_node = node_queue[-1]
 
@@ -1004,7 +1003,7 @@ class Network(object):
 
                         c_last_repeated += 1
                         if c_last_repeated > 12:
-                            print(
+                            logger.warning(
                                 "loop over 'open' nodes, without fixing one. seems we are in an endless loop. Probably "
                                 "there is a loop flow.")
                             return False, node_queue

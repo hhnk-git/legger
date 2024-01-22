@@ -1,6 +1,8 @@
 import logging
+from qgis.core import Qgis
 
 try:
+    from legger.utils.user_message import messagebar_message
     from legger.sql_models.legger_views import create_legger_views
     from legger.utils.network import Network, load_spatialite
 except ImportError:
@@ -8,6 +10,7 @@ except ImportError:
 
     sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 
+    from legger.utils.user_message import messagebar_message
     from legger.sql_models.legger_views import create_legger_views
     from legger.utils.network import Network, load_spatialite
 
@@ -21,9 +24,41 @@ def redirect_flows(path_legger_db, change_flow_direction=True):
         network.force_direction()
         network.re_distribute_flow()
     else:
-        network.re_distribute_flow(attempt=1)
-        network.force_direction(only_without_flow=True)
-        network.re_distribute_flow(attempt=2)
+        success, left_overs1 = network.re_distribute_flow(attempt=1)
+        if not success:
+            log.info("distribute_flow attempt 1 failed, try again with flow direction of undefined direction forced")
+            network.force_direction(only_without_flow=True)
+            success, left_overs = network.re_distribute_flow(attempt=2)
+            if not success:
+                msg = "Herverdeling is niet geheel gelukt, omdat voor een deel geen oplossing is gevonden. " \
+                      "Deze hydrovakken hebben een debiet=null. Oorzaken kunnen zijn dat er (geisoleerderde) " \
+                      "circulaire delen aanwezig zijn, de eindpunten zijn verbonden met hydrovakken zonder debiet " \
+                      "of verkeerde richting, of te veel ontbrekende 3di debieten in een deel. Eventueel kan het " \
+                      "draaien van deze taak met 'stroomrichting aanpasbaar' een oplossing geven. "
+                if len(left_overs):
+                    objs = []
+                    for n in left_overs:
+                        objs = objs + [*n.incoming()] + [*n.outgoing()]
+                    objs = set([str(l.id) for l in objs])
+
+                    msg += "Delen zonder oplossing omvatten in ieder geval de volgende hydroobjecten: {}".format(
+                        ", ".join(objs))
+                elif len(left_overs1):
+                    objs = []
+                    for n in left_overs1:
+                        objs = objs + [*n.incoming()] + [*n.outgoing()]
+                    objs = set([str(l.id) for l in objs])
+
+                    msg += "Delen zonder oplossing omvatten mogelijk de volgende hydroobjecten: {}".format(
+                        ", ".join(objs))
+
+                messagebar_message(
+                    'Fout',
+                    msg,
+                    Qgis.MessageLevel.Warning,
+                    duration=-1
+                )
+                log.warning(msg)
 
     network.save_network_values()
     log.info("Save redirecting flow result (update) to database ")
