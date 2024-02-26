@@ -919,7 +919,7 @@ class LeggerWidget(QDockWidget):
         self.selected_variant_remark.setDisabled(False)
 
         self.kijk_variant_knop.setDisabled(False)
-        self.selected_variant_remark.setPlainText(item.hydrovak.get('selected_remarks'))
+        self.selected_variant_remark.setPlainText(item.hydrovak.get('opmerkingen'))
 
         perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
                  'on_select_edit_hydrovak - till update_available_variants')
