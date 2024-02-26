@@ -1,4 +1,5 @@
 import logging
+import os
 from collections import OrderedDict
 
 from PyQt4.QtCore import QMetaObject, QSize, Qt, pyqtSignal
@@ -20,6 +21,7 @@ from network_graph_widgets import LeggerPlotWidget, LeggerSideViewPlotWidget
 from qgis.core import QgsFeature, QgsGeometry, QgsMapLayerRegistry
 from qgis.networkanalysis import QgsLineVectorLayerDirector
 from sqlalchemy import and_, or_
+import inspect
 
 from .network_table_widgets import LeggerTreeWidget, StartpointTreeWidget, VariantenTable
 
@@ -43,6 +45,27 @@ PRE_SELECTED = 'opgegeven'
 STRATEGY_THIS = 'dit hydrovak'
 STRATEGY_DONWSTREAM_ALL = 'benedenstr. altijd'
 STRATEGY_DONWSTREAM_LESS = 'benedenstr. of meer'
+
+performance_log = []
+
+
+def perf_log(linenr, step, obj=None):
+    global performance_log
+    now = datetime.datetime.now()
+    if len(performance_log) > 0:
+        last = performance_log[-1][3]
+        performance_log.append((linenr, step, obj, now, now - last))
+    else:
+        performance_log.append((linenr, step, obj, now, None))
+
+
+def log_performance():
+    global performance_log
+    # write as csv
+    with open(os.path.join(os.path.dirname(__file__), os.pardir, 'performance_log.csv'), 'w') as f:
+        for row in performance_log:
+            f.write(f'{row[0]};{row[1]};{row[2]};{row[3]};{row[4]}\n')
+    performance_log = []
 
 
 def interpolated_color(value, color_map, alpha=255):
@@ -525,6 +548,8 @@ class LeggerWidget(QDockWidget):
         index (QIndex): index of changed field
         """
 
+        self.performance_log = []
+
         if self.area_model.columns[index.column()].get('field') == 'selected':
             # clear display elements
 
@@ -686,6 +711,8 @@ class LeggerWidget(QDockWidget):
         return: -
         """
 
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno, 'on_select_edit_hydrovak - start')
+
         hydro_object = self.session.query(HydroObject).filter_by(id=item.hydrovak.get('hydro_id')).first()
         if hydro_object is None:
             self.selected_variant_remark.setPlainText('')
@@ -698,8 +725,22 @@ class LeggerWidget(QDockWidget):
         self.selected_hydrovak_db = hydro_object
 
         self.selected_variant_remark.setDisabled(False)
+<<<<<<< Updated upstream
         self.selected_variant_remark.setPlainText(item.hydrovak.get('selected_remarks'))
+=======
+        self.kijk_variant_knop.setDisabled(False)
+        self.selected_variant_remark.setPlainText(item.hydrovak.get('opmerkingen'))
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'on_select_edit_hydrovak - till update_available_variants')
+
+>>>>>>> Stashed changes
         self.update_available_variants()
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'on_select_edit_hydrovak - finished update available variants')
+
+        log_performance()
 
     def save_remarks(self):
         if self.selected_hydrovak:
@@ -715,11 +756,17 @@ class LeggerWidget(QDockWidget):
 
     def update_available_variants(self):
 
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - start')
+
         item = self.selected_hydrovak
         hydro_object = self.selected_hydrovak_db
         self.variant_model.removeRows(0, len(self.variant_model.rows))
 
         selected_variant_id = item.hydrovak.get('selected_variant_id')
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - start query variants')
 
         var = self.session.query(Varianten) \
             .join(BegroeiingsVariant) \
@@ -736,6 +783,13 @@ class LeggerWidget(QDockWidget):
             var = var.filter(or_(BegroeiingsVariant.naam == self.active_begroeiings_variant,
                                  Varianten.id == selected_variant_id))
 
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - finished definition variants')
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 str(var))
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 f"hydro_id = {hydro_object.id}, selected_variant_id = {selected_variant_id}")
+
         from legger import settings
         verhang = 3.0
         color_map = (
@@ -744,7 +798,14 @@ class LeggerWidget(QDockWidget):
             (4.0, settings.HIGH_COLOR),
         )
         profs = []
-        for profile in var.all():
+
+        # force query
+        profiles = list(var.all())
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - finished fetching variants - start loop')
+
+        for profile in profiles:
             active = selected_variant_id == profile.id
             over_width = None
             over_depth = None
@@ -777,7 +838,14 @@ class LeggerWidget(QDockWidget):
                     (0.5 * profile.waterbreedte, hydro_object.streefpeil),
                 ]
             })
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - finished loop - start update model')
+
         self.variant_model.insertRows(profs)
+
+        perf_log(inspect.getframeinfo(inspect.currentframe()).lineno,
+                 'update_available_variants - finished update model')
 
     def update_available_profiles(self, item, variant):
         """
