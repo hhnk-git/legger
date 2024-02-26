@@ -978,7 +978,6 @@ class LeggerWidget(QDockWidget):
 
         var = self.session.query(Varianten) \
             .join(BegroeiingsVariant) \
-            .outerjoin(ProfielFiguren) \
             .filter(Varianten.hydro == hydro_object) \
             .order_by(Varianten.diepte)
 
@@ -990,7 +989,6 @@ class LeggerWidget(QDockWidget):
         elif self.active_begroeiings_variant == STANDARD:
             var = self.session.query(Varianten) \
                 .join(BegroeiingsVariant) \
-                .outerjoin(ProfielFiguren) \
                 .filter(Varianten.hydro == hydro_object) \
                 .filter(Varianten.standaard_profiel_code != None) \
                 .order_by(Varianten.diepte)
