@@ -1,6 +1,6 @@
 import logging
 import os.path
-
+from qgis.core import QgsSettings
 from qgis.PyQt.QtCore import (QSettings, QTranslator, qVersion, QCoreApplication, pyqtSignal,
                           QObject)
 from qgis.PyQt.QtGui import QIcon
@@ -44,7 +44,7 @@ class Legger(QObject):
             os.path.pardir)
 
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QgsSettings().value('locale/userLocale')[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
