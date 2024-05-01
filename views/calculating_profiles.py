@@ -6,14 +6,11 @@ from qgis.PyQt import QtCore, QtWidgets
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QWidget
 
-from legger.sql_models.legger import HydroObject
 from legger.sql_models.legger_database import LeggerDatabase
 from legger.sql_models.legger_database import load_spatialite
 from legger.utils.automatic_fill_legger import automatic_fill_legger
 from legger.utils.calc_gradient import calc_gradient
 from legger.utils.profile_match_a import doe_profinprof, maaktabellen
-from legger.utils.read_tdi_results import (get_timestamps, read_tdi_culvert_results, read_tdi_results,
-                                           write_tdi_culvert_results_to_db, write_tdi_results_to_db)
 from legger.utils.redirect_flows_to_main_branches import redirect_flows
 from legger.utils.snap_points import snap_points
 from legger.utils.theoretical_profiles import create_variants
@@ -75,45 +72,16 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.last_timestep_text = 'laatste tijdstap'
         self.timestamps = []
 
-        try:
-            self.timestamps = get_timestamps(self.path_result_nc)
-        except:
-            pass
-
         self.setup_ui()
-
-        # fill timestep combobox
-        choices = [self.last_timestep_text] + ['%.0f' % t for t in self.timestamps]
-        # self.timestep_combo_box.insertItems(0, choices)
-        # self.timestep_combo_box.setCurrentIndex(0)
-
-        # set time combobox listeners
-        # self.timestep_combo_box.currentIndexChanged.connect(
-        #     self.timestep_selection_change)
 
         # surge combobox
         self.last_surge_text = "kies opstuwingsnorm"
-
-    def timestep_selection_change(self, nr):
-        """Proces new selected timestep in combobox
-
-        :param nr:
-        :return:
-        """
-        text = self.timestep_combo_box.currentText()
-        if text == self.last_timestep_text:
-            self.timestep = -1
-        else:
-            self.timestep = nr - 1
 
     def closeEvent(self, event):
         """
         event (QtEvent): event triggering close
         returns: None
         """
-        # # set listeners
-        # self.timestep_combo_box.currentIndexChanged.disconnect(
-        #     self.timestep_selection_change)
 
         self.closingDialog.emit()
         self.close()
@@ -149,81 +117,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
                                               "de tijdstappen moet tussen ongeveer 2/3 en 3/4 van de grootste tijdstap")
 
         self.box_step3diold.addWidget(self.msg_upper_row)
-
-    def execute_step_old_3di(self):
-        """
-       Eerste stap in klaarzetten van de data:
-        - update legger database met data vanuit de netcdf (koppeling debieten van gekozen tijdstap)
-        returns: None
-        """
-        # first update legger spatialite according to schema, using sqlAlchemy
-        db = LeggerDatabase(self.polder_datasource)
-        # db.create_and_check_fields()
-        # do one query, don't know what the reason was for this...
-        session = db.get_session()
-        session.query(HydroObject)
-
-        timestamp = 'laatst' if self.timestep == 0 else '{0} op {1:.0f} s'.format(
-            self.timestep + 1,
-            self.timestamps[self.timestep])
-
-        self.feedbackmessage = 'Neem tijdstap {0}'.format(timestamp)
-
-        result = None
-        if True:
-            # read 3di channel results
-            result = read_tdi_results(
-                self.path_model_db,
-                self.path_result_db,
-                self.path_result_nc,
-                self.polder_datasource,
-                self.timestep
-            )
-            self.feedbackmessage += "\nDatabases zijn gekoppeld."
-
-        # except Exception as e:
-        #     self.feedbackmessage += "\nDatabases zijn niet gekoppeld. melding: {0}\n".format(e)
-        # finally:
-        #     self.feedbacktext.setText(self.feedbackmessage)
-
-        if result is not None:
-            try:
-                # write 3di channel result to legger spatialite
-                write_tdi_results_to_db(
-                    result,
-                    self.polder_datasource)
-
-                self.feedbackmessage = self.feedbackmessage + "\n3Di resultaten weggeschreven naar polder database."
-            except:
-                self.feedbackmessage = self.feedbackmessage + "\nFout in wegschrijven 3Di resultaten naar polder database."
-            finally:
-                self.feedbacktext.setText(self.feedbackmessage)
-
-        culv_results = None
-        try:
-            # read 3di culvert results
-            culv_results = read_tdi_culvert_results(
-                self.path_model_db,
-                self.path_result_db,
-                self.path_result_nc,
-                self.polder_datasource,
-                self.timestep
-            )
-            self.feedbackmessage = self.feedbackmessage + "\n3Di culverts ingelezen."
-        except:
-            self.feedbackmessage = self.feedbackmessage + "\nFout, 3Di culverts niet ingelezen."
-        finally:
-            self.feedbacktext.setText(self.feedbackmessage)
-
-        if culv_results is not None:
-            try:
-                # write 3di culvert results to legger spatialite
-                write_tdi_culvert_results_to_db(culv_results, self.polder_datasource)
-                self.feedbackmessage = self.feedbackmessage + "\n3Di culvert resultaten weggeschreven."
-            except:
-                self.feedbackmessage = self.feedbackmessage + "\nFout, 3Di culvert resultaten niet weggeschreven."
-            finally:
-                self.feedbacktext.setText(self.feedbackmessage)
 
     def execute_redirect_flows(self):
         change_flow_direction = self.change_flow_direction_checkbox.isChecked()
@@ -426,40 +319,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
         self.box_run_post_process.addWidget(self.run_post_process_button)
         self.groupBox_post_process.setLayout(self.box_run_post_process)  # box toevoegen aan groupbox
 
-        # old 3di
-        # timestep selection for UPPER ROW groupbox:
-        # self.timestep_combo_box = QComboBox(self)
-
-        # self.step3di_button = QtWidgets.QPushButton(self)
-        # self.step3di_button.setObjectName("step3di_button")
-        # self.step3di_button.clicked.connect(self.execute_step_old_3di)
-
-        # self.step3diold_explanation_button = QtWidgets.QPushButton(self)
-        # self.step3diold_explanation_button.setObjectName("uitleg_stap1")
-        # self.step3diold_explanation_button.clicked.connect(self.explain_step_old_3di)
-
-        # self.groupBox_step3diold = QtWidgets.QGroupBox(self)
-        # self.groupBox_step3diold.setTitle("oude functies: lees 3di resultaten")
-        # self.box_step3diold = QtWidgets.QVBoxLayout()
-
-        # self.model_filename = QtWidgets.QLineEdit(self)
-        # self.model_filename.setText(self.path_model_db)
-        # self.model_filename.setObjectName("model filename")
-        # self.result_filename = QtWidgets.QLineEdit(self)
-        # self.result_filename.setText(self.path_result_nc)
-        # self.result_filename.setObjectName("result filename")
-        # self.connection_filename = QtWidgets.QLineEdit(self)
-        # self.connection_filename.setText(self.path_result_db)
-        # self.connection_filename.setObjectName("connection filename")
-        # self.box_step3diold.addWidget(self.model_filename)
-        # self.box_step3diold.addWidget(self.result_filename)
-        # self.box_step3diold.addWidget(self.connection_filename)
-
-        # self.box_step3diold.addWidget(self.timestep_combo_box)
-        # self.box_step3diold.addWidget(self.step3di_button)
-        # self.box_step3diold.addWidget(self.step3diold_explanation_button)
-        # self.groupBox_step3diold.setLayout(self.box_step3diold)  # box toevoegen aan groupbox
-
         # Assembling feedback row
         self.feedbacktext = QtWidgets.QTextEdit(self)
         self.feedbackmessage = "Nog geen berekening uitgevoerd"
@@ -498,8 +357,6 @@ class ProfileCalculationWidget(QWidget):  # , FORM_CLASS):
 
         Dialog.setWindowTitle("Bereken de profielvarianten van de polder")
         self.save_button.setText("Opslaan en sluiten")
-        # self.step3diold_explanation_button.setText("Uitleg stap inlezen 3di netCDF")
-        # self.step3di_button.setText("Verbindt resultaten van netCDF aan de hydro-objecten")
         self.step_redirect_flow_button.setText("Kies eerst eindpunten, dan herverdeel debieten")
         self.step2_explanation_button.setText("Uitleg stap 3")
         self.step2_button.setText("Bereken alle mogelijke leggerprofielen")
