@@ -1,3 +1,7 @@
+# This repo is archived
+Development will continue on https://github.com/HHNK/leggertool
+
+
 # Legger
 
 Toolset for assigning 'legger' profiles to channels (hydro objects), based on
